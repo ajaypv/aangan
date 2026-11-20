@@ -25,5 +25,4 @@ services:
         sync: false
       - key: LLM_API_KEY          # Bearer secret Agora sends to /v1/chat/completions: any long random string
         generateValue: true
-      - key: PUBLIC_BASE_URL      # this service's own https address, for example https://aangan.onrender.com
-        sync: false
+      # PUBLIC_BASE_URL is not needed: the backend uses the RENDER_EXTERNAL_URL that Render sets itself

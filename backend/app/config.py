@@ -98,7 +98,8 @@ def settings() -> Settings:
         agora_app_certificate=_env("AGORA_APP_CERTIFICATE"),
         murf_api_key=_env("MURF_API_KEY"),
         murf_model=_env("MURF_MODEL", "FALCON"),
-        public_base_url=_env("PUBLIC_BASE_URL").rstrip("/"),
+        # Render sets RENDER_EXTERNAL_URL to the service's own https address, so a deployment needs no manual URL
+        public_base_url=(_env("PUBLIC_BASE_URL") or _env("RENDER_EXTERNAL_URL")).rstrip("/"),
         llm_api_key=_env("LLM_API_KEY"),
         anthropic_api_key=_env("ANTHROPIC_API_KEY"),
         llm_model=_env("LLM_MODEL", "claude-sonnet-5-5"),

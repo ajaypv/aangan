@@ -401,3 +401,12 @@ def test_local_mode_still_hides_the_api_from_a_public_host():
     client = TestClient(app, base_url="https://abc.trycloudflare.com")
     assert client.get("/api/config").status_code == 404
     assert client.post("/v1/chat/completions", json={"messages": []}).status_code != 404
+
+
+def test_public_url_falls_back_to_the_hosts_own_address(monkeypatch):
+    from app.config import settings
+
+    monkeypatch.setenv("RENDER_EXTERNAL_URL", "https://aangan.onrender.com/")
+    assert settings().public_base_url == "https://aangan.onrender.com"
+    monkeypatch.setenv("PUBLIC_BASE_URL", "https://custom.example.com")
+    assert settings().public_base_url == "https://custom.example.com"
