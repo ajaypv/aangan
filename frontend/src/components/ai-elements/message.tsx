@@ -50,9 +50,10 @@ export const MessageContent = ({
 }: MessageContentProps) => (
   <div
     className={cn(
-      "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm",
-      "group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground",
-      "group-[.is-assistant]:text-foreground",
+      "is-user:dark flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-[0.9375rem] leading-relaxed",
+      // The usual chat shapes: yours on the right in a soft brand tint, Aangan's on the left in a quiet card, each with one squared corner.
+      "group-[.is-user]:ml-auto group-[.is-user]:rounded-[1.125rem] group-[.is-user]:rounded-br-[0.375rem] group-[.is-user]:bg-brand-soft group-[.is-user]:px-4 group-[.is-user]:py-2.5 group-[.is-user]:text-ink",
+      "group-[.is-assistant]:rounded-[1.125rem] group-[.is-assistant]:rounded-bl-[0.375rem] group-[.is-assistant]:border group-[.is-assistant]:border-line group-[.is-assistant]:bg-surface group-[.is-assistant]:px-4 group-[.is-assistant]:py-2.5 group-[.is-assistant]:text-ink",
       className
     )}
     {...props}

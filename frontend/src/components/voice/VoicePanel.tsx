@@ -1,12 +1,11 @@
-import { Check, ChevronDown, Hand, Loader2, Mic, MicOff, PhoneOff, Plug, RefreshCw, Sparkles, TriangleAlert, Volume2, X } from 'lucide-react'
+import { Check, Hand, Info, Loader2, Mic, MicOff, PhoneOff, Plug, RefreshCw, Sparkles, TriangleAlert, Volume2, X } from 'lucide-react'
 import { useEffect, useState, type Ref } from 'react'
 import { Orb, type OrbState } from '@/components/ask/Orb'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { memberOf } from '@/lib/format'
 import { STEP_LABELS, STEP_ORDER, type StepId, type StepStatus, type VoiceState } from '@/lib/voiceSession'
 import { cn } from '@/lib/utils'
 import { useApp } from '@/state/AppState'
-import { Avatar, Button } from '@/ui/primitives'
+import { Avatar, Button, IconButton } from '@/ui/primitives'
 
 function orbState(v: VoiceState): OrbState {
   if (v.phase === 'connecting' || v.phase === 'waiting-agent') return 'connecting'
@@ -52,12 +51,12 @@ function Connecting({ v, headingRef }: { v: VoiceState; headingRef?: Ref<HTMLHea
   const elapsed = useElapsed(v.phase === 'waiting-agent')
   const current = STEP_ORDER.find((id) => v.steps[id] === 'active') ?? (v.phase === 'waiting-agent' ? 'agent' : 'backend')
   return (
-    <div className="flex items-center gap-4 px-4 py-4" aria-live="polite">
-      <Orb state="connecting" size={72}>
+    <div className="flex items-center gap-3 px-3 py-2.5" aria-live="polite">
+      <Orb state="connecting" size={56}>
         <Loader2 className="size-5 animate-spin" />
       </Orb>
       <div className="min-w-0 flex-1">
-        <h2 ref={headingRef} tabIndex={-1} className="font-semibold outline-none">
+        <h2 ref={headingRef} tabIndex={-1} className="text-sm font-semibold outline-none">
           Connecting{member ? ` as ${member.name}` : ''}…
         </h2>
         <p className="t-secondary truncate">
@@ -72,50 +71,71 @@ function Connecting({ v, headingRef }: { v: VoiceState; headingRef?: Ref<HTMLHea
   )
 }
 
-/** Voice mode: the orb, what Aangan is doing, the words being said right now, and three controls. */
-function Live({ v, headingRef }: { v: VoiceState; headingRef?: Ref<HTMLHeadingElement> }) {
+/**
+ * Voice mode as one slim call bar above the conversation, so the chat keeps the screen: the orb that swells with the voice, what Aangan is
+ * doing, the words being said right now, and round controls (mute, interrupt while it speaks, end). Details live behind the info button.
+ */
+function Live({ v, headingRef, detailsOpen, onDetails }: { v: VoiceState; headingRef?: Ref<HTMLHeadingElement>; detailsOpen: boolean; onDetails: () => void }) {
   const { stopVoice, toggleMute, interruptVoice, snap } = useApp()
   const member = snap && v.memberId ? memberOf(snap, v.memberId) : undefined
   const state = orbState(v)
   const speaking = v.agentState === 'speaking'
   const last = v.turns[v.turns.length - 1]
-  const caption = last
-    ? last.who === 'user'
-      ? `“${last.text}”`
-      : last.text
-    : 'Go ahead, I am listening.'
+  const caption = last ? (last.who === 'user' ? `“${last.text}”` : last.text) : 'Go ahead, I am listening.'
   const warning = v.issues.find((i) => (i.source === 'agent' || i.source === 'rtm') && Date.now() - i.at < 45_000)
   return (
-    <div className="px-4 py-5 text-center">
+    <div className="px-3 py-2.5">
       <h2 ref={headingRef} tabIndex={-1} className="sr-only outline-none">
         Voice conversation with Aangan
       </h2>
-      <div className="flex justify-center">
-        <Orb state={state} source={v.muted ? 'none' : speaking ? 'agent' : 'mic'} size={112}>
-          {state === 'muted' ? <MicOff className="size-7" /> : state === 'thinking' ? <Sparkles className="size-7" /> : state === 'speaking' ? <Volume2 className="size-7" /> : <Mic className="size-7" />}
+      <div className="flex items-center gap-3">
+        <Orb state={state} source={v.muted ? 'none' : speaking ? 'agent' : 'mic'} size={56}>
+          {state === 'muted' ? <MicOff className="size-5" /> : state === 'thinking' ? <Sparkles className="size-5" /> : state === 'speaking' ? <Volume2 className="size-5" /> : <Mic className="size-5" />}
         </Orb>
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 text-sm font-semibold" role="status" aria-live="polite">
+            {member && <Avatar member={member} size={18} />}
+            {stateLabel(v)}
+          </p>
+          <p className={cn('line-clamp-2 text-sm', last?.who === 'user' ? 'text-ink-2' : 'text-ink')} aria-live="off">
+            {caption}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <IconButton
+            label={v.muted ? 'Unmute' : 'Mute'}
+            variant="secondary"
+            tooltip={false}
+            aria-pressed={v.muted}
+            className="size-10 rounded-full lg:size-10"
+            onClick={() => void toggleMute()}
+          >
+            {v.muted ? <MicOff className="size-[18px]" /> : <Mic className="size-[18px]" />}
+          </IconButton>
+          {speaking && (
+            <IconButton label="Interrupt" variant="secondary" tooltip={false} disabled={!v.rtmReady} className="size-10 rounded-full lg:size-10" onClick={() => void interruptVoice()}>
+              <Hand className="size-[18px]" />
+            </IconButton>
+          )}
+          <IconButton
+            label="Details"
+            variant="tertiary"
+            tooltip={false}
+            aria-expanded={detailsOpen}
+            className="relative size-10 rounded-full lg:size-10"
+            onClick={onDetails}
+          >
+            <Info className="size-[18px]" />
+            {v.issues.length > 0 && <span className="absolute right-1.5 top-1.5 size-2.5 rounded-full bg-[var(--rw-warning)] ring-2 ring-surface" role="img" aria-label={`${v.issues.length} notices`} />}
+          </IconButton>
+          <IconButton label="End call" variant="secondary" tooltip={false} className="size-10 rounded-full !bg-[var(--rw-danger)] !text-white hover:!bg-[rgb(var(--rw-danger-130))] lg:size-10" onClick={() => void stopVoice()}>
+            <PhoneOff className="size-[18px]" />
+          </IconButton>
+        </div>
       </div>
-      <p className="mt-3 flex items-center justify-center gap-2 text-base font-semibold" role="status" aria-live="polite">
-        {member && <Avatar member={member} size={22} />}
-        {stateLabel(v)}
-      </p>
-      <p className={cn('mx-auto mt-1 line-clamp-2 min-h-11 max-w-md text-sm', last?.who === 'user' ? 'text-ink-2' : 'text-ink')} aria-live="off">
-        {caption}
-      </p>
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-        <Button variant="secondary" aria-pressed={v.muted} onClick={() => void toggleMute()} icon={v.muted ? <MicOff className="size-4" aria-hidden="true" /> : <Mic className="size-4" aria-hidden="true" />}>
-          {v.muted ? 'Unmute' : 'Mute'}
-        </Button>
-        <Button variant="secondary" disabled={!speaking || !v.rtmReady} onClick={() => void interruptVoice()} icon={<Hand className="size-4" aria-hidden="true" />}>
-          Interrupt
-        </Button>
-        <Button variant="danger" onClick={() => void stopVoice()} icon={<PhoneOff className="size-4" aria-hidden="true" />}>
-          End
-        </Button>
-      </div>
-      {!v.rtmReady && <p className="t-caption mx-auto mt-2 max-w-sm">Live captions are not connected, so the status and interrupt are limited. You can still talk.</p>}
+      {!v.rtmReady && <p className="t-caption mt-1.5 pl-[68px]">Live captions are not connected, so the status and interrupt are limited. You can still talk.</p>}
       {warning && (
-        <p className="mx-auto mt-2 flex max-w-sm items-start justify-center gap-1.5 text-xs text-[var(--rw-text-danger)]" role="alert">
+        <p className="mt-1.5 flex items-start gap-1.5 pl-[68px] text-xs text-[var(--rw-text-danger)]" role="alert">
           <TriangleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
           <span>{warning.message}</span>
         </p>
@@ -203,17 +223,13 @@ export function VoiceSetupNotice({ onClose }: { onClose: () => void }) {
 
 const row = 'flex justify-between gap-3 py-1'
 
+/** The call's technical details. Closed unless the person opens them; scrolls inside itself so it can never push the chat off the screen. */
 function ConnectionDetails({ v }: { v: VoiceState }) {
-  const [open, setOpen] = useState(false)
   const s = v.session
   const yesNo = (b: boolean) => (b ? 'yes' : 'no')
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="border-t border-line bg-bg">
-      <CollapsibleTrigger className="mx-auto flex min-h-9 w-full max-w-3xl items-center justify-between gap-2 px-4 text-xs font-semibold text-ink-2">
-        <span>Connection details{v.issues.length > 0 ? ` (${v.issues.length} notice${v.issues.length > 1 ? 's' : ''})` : ''}</span>
-        <ChevronDown className={cn('size-4 transition-transform', open && 'rotate-180')} aria-hidden="true" />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="mx-auto max-w-3xl px-4 pb-3 text-xs">
+    <div className="max-h-[40dvh] overflow-y-auto border-t border-line bg-bg px-4 py-3 text-xs">
+      <div className="mx-auto max-w-3xl">
         <dl className="divide-y divide-line">
           <div className={row}><dt className="text-ink-2">Channel</dt><dd className="num break-all font-mono">{s?.channel ?? '-'}</dd></div>
           <div className={row}><dt className="text-ink-2">Agent id</dt><dd className="break-all font-mono">{s?.agent_id ?? '-'}</dd></div>
@@ -251,21 +267,27 @@ function ConnectionDetails({ v }: { v: VoiceState }) {
             ))}
           </ul>
         </div>
-      </CollapsibleContent>
-    </Collapsible>
+      </div>
+    </div>
   )
 }
 
 /** Everything about a voice call that sits above the conversation. It renders nothing while there is no call and no problem. */
 export function VoicePanel({ headingRef }: { headingRef?: Ref<HTMLHeadingElement> }) {
   const { voice: v } = useApp()
+  const [details, setDetails] = useState(false)
+  useEffect(() => {
+    if (v.phase === 'idle') setDetails(false)
+  }, [v.phase])
   if (v.phase === 'idle') return null
+  const toggle = () => setDetails((d) => !d)
+  const hasNotes = v.issues.length > 0 || v.error !== null
   return (
     <section aria-label="Voice conversation" className="border-b border-line bg-surface">
       {(v.phase === 'connecting' || v.phase === 'waiting-agent') && <Connecting v={v} headingRef={headingRef} />}
-      {v.phase === 'live' && <Live v={v} headingRef={headingRef} />}
+      {v.phase === 'live' && <Live v={v} headingRef={headingRef} detailsOpen={details} onDetails={toggle} />}
       {v.phase === 'ending' && (
-        <div className="px-4 py-4 text-center text-sm font-semibold" role="status">
+        <div className="px-4 py-3 text-center text-sm font-semibold" role="status">
           <h2 ref={headingRef} tabIndex={-1} className={HEADING}>
             Ending the call
           </h2>
@@ -273,7 +295,13 @@ export function VoicePanel({ headingRef }: { headingRef?: Ref<HTMLHeadingElement
         </div>
       )}
       {v.phase === 'error' && <Problem v={v} headingRef={headingRef} />}
-      <ConnectionDetails v={v} />
+      {v.phase !== 'live' && v.phase !== 'ending' && hasNotes && (
+        <button type="button" onClick={toggle} aria-expanded={details} className="flex min-h-9 w-full items-center justify-center gap-1.5 border-t border-line text-xs font-semibold text-ink-2">
+          <Info className="size-3.5" aria-hidden="true" />
+          {details ? 'Hide details' : `Details (${v.issues.length} ${v.issues.length === 1 ? 'notice' : 'notices'})`}
+        </button>
+      )}
+      {details && <ConnectionDetails v={v} />}
     </section>
   )
 }

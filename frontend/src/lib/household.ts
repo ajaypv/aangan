@@ -131,8 +131,9 @@ export function statusLine(snap: Snapshot, m: Member): string {
     const kid = kidOf(snap, m.id)
     if (!kid) return 'No school updates yet'
     if (kid.status === 'at_school') return kid.arrived_at ? `At school since ${kid.arrived_at}` : 'At school'
-    const start = schoolToday(snap, m.id)?.start
-    return start !== undefined && minutes(snap.now.time) > minutes(start) ? 'Not at school yet' : 'No school updates yet'
+    const school = schoolToday(snap, m.id)
+    const now = minutes(snap.now.time)
+    return school !== undefined && now > minutes(school.start) && now < minutes(school.end) ? 'Not at school yet' : 'No school updates yet'
   }
   if (m.kind === 'senior') {
     const senior = seniorOf(snap, m.id)

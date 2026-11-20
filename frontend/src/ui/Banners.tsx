@@ -1,11 +1,12 @@
 import { CheckCircle2, Download, Info, WifiOff, X, XCircle } from 'lucide-react'
 import { useState } from 'react'
 import { useApp } from '@/state/AppState'
-import { usePwa } from '@/pwa/usePwa'
+import { usePwa } from '@/pwa/PwaProvider'
 import { cn } from '@/lib/utils'
 import { Banner, Button, IconButton } from './primitives'
 
 const DISMISSED = 'aangan-install-dismissed'
+const SNOOZE_MS = 7 * 24 * 60 * 60 * 1000 // "Not now" hides the install offer for a week; Settings always has it
 
 const TOAST_EDGE = {
   success: 'border-l-[var(--rw-success)]',
@@ -93,7 +94,8 @@ export function StatusBanners() {
   const pwa = usePwa()
   const [hidden, setHidden] = useState(() => {
     try {
-      return localStorage.getItem(DISMISSED) === '1'
+      const until = Number(localStorage.getItem(DISMISSED))
+      return Number.isFinite(until) && until > Date.now()
     } catch {
       return false
     }
@@ -101,7 +103,7 @@ export function StatusBanners() {
   const hideInstall = () => {
     setHidden(true)
     try {
-      localStorage.setItem(DISMISSED, '1')
+      localStorage.setItem(DISMISSED, String(Date.now() + SNOOZE_MS))
     } catch {
       // Not persisted.
     }

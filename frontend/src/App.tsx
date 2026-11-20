@@ -1,6 +1,7 @@
 import { CloudOff } from 'lucide-react'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { PwaProvider } from '@/pwa/PwaProvider'
 import { Home } from '@/screens/Home'
 import { Onboarding } from '@/screens/Onboarding'
 import { SettingsScreen } from '@/screens/SettingsScreen'
@@ -83,9 +84,11 @@ function Shell() {
 export default function App() {
   return (
     <TooltipProvider>
-      <AppProvider>
-        <Shell />
-      </AppProvider>
+      <PwaProvider>
+        <AppProvider>
+          <Shell />
+        </AppProvider>
+      </PwaProvider>
     </TooltipProvider>
   )
 }

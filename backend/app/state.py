@@ -1,8 +1,9 @@
 import os
 import re
 import threading
-import time
 from copy import deepcopy
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import httpx
 
@@ -14,8 +15,23 @@ MAX_EVENTS_SAVED = 200
 MAX_TRANSCRIPT_SAVED = 100
 
 
+def _zone():
+    """The household's timezone: India by default (a host such as Render runs on UTC), AANGAN_TIMEZONE to change it."""
+    try:
+        return ZoneInfo(os.getenv("AANGAN_TIMEZONE", "").strip() or "Asia/Kolkata")
+    except Exception:  # no tz database on this machine: fall back to India's fixed offset
+        return timezone(timedelta(hours=5, minutes=30))
+
+
 def _real_now() -> dict:
-    return {"date": time.strftime("%Y-%m-%d"), "time": time.strftime("%H:%M")}
+    now = datetime.now(_zone())
+    return {"date": now.strftime("%Y-%m-%d"), "time": now.strftime("%H:%M")}
+
+
+def _scripted_clock() -> bool:
+    """AANGAN_CLOCK=scripted pins the demo family to its scripted morning (Friday 07:30). Otherwise every household,
+    the demo included, follows the real clock."""
+    return os.getenv("AANGAN_CLOCK", "real").strip().lower() == "scripted"
 
 
 class FamilyState:
@@ -35,7 +51,7 @@ class FamilyState:
             self.members = deepcopy(seed.MEMBERS)
             self.memory = deepcopy(seed.MEMORY)
             self.calendar = deepcopy(seed.CALENDAR)
-            self.now = {"date": seed.TODAY, "time": "07:30"}  # the demo keeps a fixed, scripted clock
+            self.now = {"date": seed.TODAY, "time": "07:30"} if _scripted_clock() else _real_now()
             self.persona = "priya"
         else:
             self.members, self.memory, self.calendar = [], [], []
@@ -55,8 +71,8 @@ class FamilyState:
         self.reset(demo=True)
 
     def refresh_clock(self) -> None:
-        """A real household follows the real clock; the demo keeps its scripted one."""
-        if not self.demo:
+        """Every household follows the real clock, except the demo when AANGAN_CLOCK=scripted."""
+        if not (self.demo and _scripted_clock()):
             self.now.update(_real_now())
 
     # --- family lookups
@@ -104,14 +120,14 @@ class FamilyState:
         with self.lock:
             event = {
                 "id": len(self.events) + 1, "stage": self.stage, "agent": agent, "tool": tool, "args": args,
-                "status": status, "result": result, "ms": ms, "ts": time.strftime("%H:%M:%S"),
+                "status": status, "result": result, "ms": ms, "ts": datetime.now(_zone()).strftime("%H:%M:%S"),
             }
             self.events.append(event)
         return event
 
     def say(self, role: str, text: str, member_id: str, agent: str | None = None) -> None:
         self.transcript.append(
-            {"role": role, "member_id": member_id, "agent": agent, "text": text, "ts": time.strftime("%H:%M:%S")}
+            {"role": role, "member_id": member_id, "agent": agent, "text": text, "ts": datetime.now(_zone()).strftime("%H:%M:%S")}
         )
 
     def notify(self, to: list[str], text: str, kind: str, agent: str) -> dict:
@@ -171,7 +187,7 @@ class FamilyState:
         saved_persona = data.get("persona") or ""
         self.persona = saved_persona if saved_persona in ids else (members[0]["id"] if members else "")
         saved_now = data.get("now")
-        self.now = dict(saved_now) if self.demo and isinstance(saved_now, dict) else _real_now()
+        self.now = dict(saved_now) if self.demo and _scripted_clock() and isinstance(saved_now, dict) else _real_now()
         self.pending, self.stage, self.chaos = None, "before", False
 
     def snapshot(self) -> dict:

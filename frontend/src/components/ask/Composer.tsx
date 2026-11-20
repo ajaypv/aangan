@@ -2,11 +2,10 @@ import { Loader2, Mic, PhoneOff, SendHorizontal } from 'lucide-react'
 import { useEffect, useRef, type KeyboardEvent, type RefObject } from 'react'
 import type { VoicePhase } from '@/lib/voiceSession'
 import { cn } from '@/lib/utils'
-import { IconButton } from '@/ui/primitives'
 
 /**
- * The one bar at the bottom of Ask: type, send, or tap the mic. The mic is the biggest control on purpose. Enter sends, Shift+Enter adds a
- * line. The text is controlled by the screen so it can be put back if sending fails.
+ * The one bar at the bottom of Ask, in the usual chat shape: a rounded field with the send button inside it, and the mic beside it. Enter
+ * sends, Shift+Enter adds a line. The text is controlled by the screen so it can be put back if sending fails.
  */
 export function Composer({
   value,
@@ -53,7 +52,7 @@ export function Composer({
 
   return (
     <form
-      className="border-t border-line bg-bg px-3 pb-3 pt-2.5"
+      className="border-t border-line bg-bg px-3 pb-2.5 pt-2.5"
       onSubmit={(e) => {
         e.preventDefault()
         if (canSend) onSubmit()
@@ -65,32 +64,33 @@ export function Composer({
         </p>
       )}
       <div className="mx-auto flex max-w-3xl items-end gap-2">
-        <label htmlFor="ask-input" className="sr-only">
-          Message Aangan
-        </label>
-        <textarea
-          id="ask-input"
-          ref={area}
-          rows={1}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={keydown}
-          disabled={offline}
-          placeholder={offline ? 'Offline' : placeholder}
-          enterKeyHint="send"
-          autoComplete="off"
-          className="max-h-[132px] min-h-12 min-w-0 flex-1 resize-none rounded-xl border border-edge bg-surface px-3.5 py-3 text-base leading-snug text-ink shadow-xs placeholder:text-ink-2 hover:border-[var(--rw-text-primary)] focus-visible:outline-2 focus-visible:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-60"
-        />
-        <IconButton
-          label="Send message"
-          variant="secondary"
-          tooltip={false}
-          disabled={!canSend}
-          onClick={onSubmit}
-          className="size-12 rounded-xl lg:size-12"
-        >
-          <SendHorizontal className="size-5" />
-        </IconButton>
+        {/* The field is one pill: focus firms its edge, and send sits inside it. */}
+        <div className="flex min-w-0 flex-1 items-end rounded-[1.75rem] border border-edge bg-surface pl-4 pr-1.5 shadow-xs transition-colors focus-within:border-[var(--rw-text-primary)]">
+          <label htmlFor="ask-input" className="sr-only">
+            Message Aangan
+          </label>
+          <textarea
+            id="ask-input"
+            ref={area}
+            rows={1}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={keydown}
+            disabled={offline}
+            placeholder={offline ? 'Offline' : placeholder}
+            enterKeyHint="send"
+            autoComplete="off"
+            className="max-h-[132px] min-h-12 min-w-0 flex-1 resize-none bg-transparent py-3 text-base leading-snug text-ink outline-none placeholder:text-ink-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+          />
+          <button
+            type="submit"
+            aria-label="Send message"
+            disabled={!canSend}
+            className="my-1 grid size-10 shrink-0 place-items-center rounded-full bg-brand text-brand-ink transition-opacity hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <SendHorizontal className="size-[18px]" aria-hidden="true" />
+          </button>
+        </div>
         <button
           ref={micRef}
           type="button"

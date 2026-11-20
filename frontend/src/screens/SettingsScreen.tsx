@@ -1,6 +1,7 @@
-import { Play, RotateCcw, Trash2 } from 'lucide-react'
+import { Download, Play, RotateCcw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { MemberForm } from '@/components/family/MemberForm'
+import { usePwa } from '@/pwa/PwaProvider'
 import { useApp } from '@/state/AppState'
 import { setMe as rememberMe, useMe } from '@/state/me'
 import type { Member, ServiceStatus } from '@/types'
@@ -104,6 +105,49 @@ function SwitchBody({ onClose }: { onClose: () => void }) {
   )
 }
 
+/** Install as an app: one tap where the browser allows it, otherwise the exact steps for this device. Always here, whatever the banner did. */
+function InstallCard() {
+  const pwa = usePwa()
+  if (pwa.isInstalled) {
+    return (
+      <ListCard aria-label="Install">
+        <ListRow leading={<Download className="size-5 text-ink-2" aria-hidden="true" />} title="Aangan is installed" subtitle="You are using it as an app." trailing={<Pill tone="success">Installed</Pill>} />
+      </ListCard>
+    )
+  }
+  if (pwa.canInstall) {
+    return (
+      <Card className="flex items-center gap-3 p-4">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-text" aria-hidden="true">
+          <Download className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="t-card">Install Aangan</p>
+          <p className="t-secondary">Opens full screen from your home screen, like any app, and starts faster.</p>
+        </div>
+        <Button onClick={() => void pwa.install()}>Install</Button>
+      </Card>
+    )
+  }
+  const steps =
+    pwa.platform === 'ios'
+      ? 'Tap the Share button in Safari, then choose Add to Home Screen.'
+      : pwa.platform === 'android'
+        ? 'Open the browser menu (the three dots), then choose Install app or Add to Home screen.'
+        : 'In Chrome or Edge, click the install icon at the right of the address bar, or open the menu and choose Install Aangan.'
+  return (
+    <Card className="flex items-start gap-3 p-4">
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-soft text-brand-text" aria-hidden="true">
+        <Download className="size-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="t-card">Install Aangan</p>
+        <p className="t-secondary">{steps}</p>
+      </div>
+    </Card>
+  )
+}
+
 function ServiceRow({ name, what, status }: { name: string; what: string; status: ServiceStatus | undefined }) {
   const ok = status?.configured ?? false
   return (
@@ -147,6 +191,10 @@ export function SettingsScreen() {
             </div>
           </Card>
         )}
+      </Section>
+
+      <Section title="Install" hint="Use Aangan like an app on this device">
+        <InstallCard />
       </Section>
 
       <Section title="Voice and services" hint="What is connected behind Aangan">

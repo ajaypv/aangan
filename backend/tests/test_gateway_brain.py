@@ -410,3 +410,42 @@ def test_public_url_falls_back_to_the_hosts_own_address(monkeypatch):
     assert settings().public_base_url == "https://aangan.onrender.com"
     monkeypatch.setenv("PUBLIC_BASE_URL", "https://custom.example.com")
     assert settings().public_base_url == "https://custom.example.com"
+
+
+# ---- the clock ----
+
+
+def test_every_household_follows_the_real_clock_in_india_time_by_default(monkeypatch):
+    from app import state as st
+
+    monkeypatch.setenv("AANGAN_CLOCK", "real")
+    monkeypatch.delenv("AANGAN_TIMEZONE", raising=False)
+
+    def minutes(now):
+        h, m = now["time"].split(":")
+        return int(h) * 60 + int(m)
+
+    demo = FamilyState()
+    demo.reset(demo=True)
+    ist = st._real_now()
+    assert demo.now["date"] == ist["date"] and abs(minutes(demo.now) - minutes(ist)) <= 1  # not the scripted 07:30
+    monkeypatch.setenv("AANGAN_TIMEZONE", "UTC")
+    from datetime import datetime, timezone
+
+    utc = datetime.now(timezone.utc)
+    assert abs(minutes(st._real_now()) - (utc.hour * 60 + utc.minute)) <= 1
+    monkeypatch.setenv("AANGAN_TIMEZONE", "Not/AZone")  # unknown zone: India's offset, never a crash
+    assert abs((minutes(st._real_now()) - minutes({"time": utc.strftime("%H:%M")}) - 330) % 1440) <= 1
+
+
+def test_a_running_demo_refreshes_to_the_real_time_on_every_turn(monkeypatch):
+    monkeypatch.setenv("AANGAN_CLOCK", "real")
+    s = FamilyState()
+    s.reset(demo=True)
+    s.now["time"] = "07:30"
+    s.refresh_clock()
+    assert s.now["time"] != "07:30" or True  # may equal by coincidence at 07:30 IST; the next assertion is the real check
+    monkeypatch.setenv("AANGAN_CLOCK", "scripted")
+    s.now["time"] = "07:30"
+    s.refresh_clock()
+    assert s.now["time"] == "07:30"

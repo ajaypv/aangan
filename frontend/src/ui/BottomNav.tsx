@@ -2,7 +2,7 @@ import { Home, Settings, Sparkles, Users, type LucideIcon } from 'lucide-react'
 import { useApp, type Tab } from '@/state/AppState'
 import { cn } from '@/lib/utils'
 
-/** Four places. Ask is the assistant and the heart of the app, so it is the one that stands out. */
+/** Four places, all equal in the bar. Ask is the assistant and sits second, with its sparkle icon in line with the rest. */
 export const NAV_ITEMS: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'ask', label: 'Ask', icon: Sparkles },
@@ -25,7 +25,10 @@ export function navLink(id: Tab, setTab: (t: Tab) => void) {
   }
 }
 
-/** Phone navigation: four items with Ask as a raised brand button. The desktop rail replaces it from 1024px. */
+/**
+ * Phone navigation, the standard bottom bar: four equal items, each an icon over a label, the current one with its icon in a soft pill.
+ * Nothing floats above the bar, so it never covers the content or the message box. The desktop rail replaces it from 1024px.
+ */
 export function BottomNav() {
   const { tab, setTab, snap } = useApp()
   const waiting = snap?.pending ? 1 : 0
@@ -34,40 +37,31 @@ export function BottomNav() {
       <ul className="mx-auto grid max-w-md grid-cols-4">
         {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
           const active = id === tab
-          if (id === 'ask') {
-            return (
-              <li key={id}>
-                <a
-                  {...navLink(id, setTab)}
-                  aria-current={active ? 'page' : undefined}
-                  className="relative flex min-h-14 w-full flex-col items-center justify-end gap-0.5 pb-1.5 text-xs font-bold text-brand-text short:min-h-11"
-                >
-                  <span
-                    className={cn(
-                      '-mt-7 grid size-14 place-items-center rounded-full bg-brand text-brand-ink shadow-md ring-4 ring-surface transition-colors short:-mt-4 short:size-11',
-                      active ? 'bg-brand-hover' : 'active:bg-brand-hover',
-                    )}
-                  >
-                    <Icon className="size-6 short:size-5" strokeWidth={2.2} />
-                    {waiting > 0 && <span className="absolute right-0 top-0 size-3.5 rounded-full bg-[var(--rw-warning)] ring-2 ring-surface" role="img" aria-label="Waiting for your answer" />}
-                  </span>
-                  <span className="short:sr-only">{label}</span>
-                </a>
-              </li>
-            )
-          }
           return (
             <li key={id}>
               <a
                 {...navLink(id, setTab)}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'relative flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs transition-colors short:min-h-11',
-                  active ? 'font-bold text-brand-text' : 'font-medium text-ink-2 active:bg-hover',
+                  'flex min-h-16 w-full flex-col items-center justify-center gap-1 pb-1 pt-2 text-xs transition-colors short:min-h-12 short:pt-1',
+                  active ? 'font-bold text-brand-text' : 'font-medium text-ink-2',
                 )}
               >
-                {active && <span aria-hidden="true" className="absolute inset-x-5 top-0 h-[3px] rounded-b-sm bg-brand" />}
-                <Icon className="size-[22px]" strokeWidth={active ? 2.4 : 2} aria-hidden="true" />
+                <span
+                  className={cn(
+                    'relative grid h-8 w-16 place-items-center rounded-full transition-colors short:h-7',
+                    active ? 'bg-brand-soft' : 'active:bg-hover',
+                  )}
+                >
+                  <Icon className="size-[22px]" strokeWidth={active ? 2.4 : 2} aria-hidden="true" />
+                  {id === 'ask' && waiting > 0 && (
+                    <span
+                      className="absolute right-3 top-0.5 size-2.5 rounded-full bg-[var(--rw-warning)] ring-2 ring-surface"
+                      role="img"
+                      aria-label="Waiting for your answer"
+                    />
+                  )}
+                </span>
                 <span className="short:sr-only">{label}</span>
               </a>
             </li>

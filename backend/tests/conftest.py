@@ -27,3 +27,10 @@ def isolated_household_file(monkeypatch, tmp_path):
     """Requests save the household after each change; tests write to a temp file, never backend/data."""
     monkeypatch.setenv("AANGAN_DATA_FILE", str(tmp_path / "household.json"))
     monkeypatch.delenv("AANGAN_DEMO_ON_START", raising=False)
+
+
+@pytest.fixture(autouse=True)
+def scripted_clock(monkeypatch):
+    """The suites assert the demo's scripted morning (Friday 2026-11-20 07:30). The real default follows the clock;
+    tests of that set AANGAN_CLOCK=real themselves."""
+    monkeypatch.setenv("AANGAN_CLOCK", "scripted")

@@ -64,9 +64,9 @@ function statusOf(snap: Snapshot, m: Member): { tone: Tone; icon: ReactNode; tex
   const iconClass = 'size-3.5'
   const kid = kidOf(snap, m.id)
   if (m.kind === 'child' && kid) {
-    const start = schoolToday(snap, m.id)?.start
+    const school = schoolToday(snap, m.id)
     const atSchool = kid.status === 'at_school'
-    const late = !atSchool && start !== undefined && minutes(snap.now.time) > minutes(start)
+    const late = !atSchool && school !== undefined && minutes(snap.now.time) > minutes(school.start) && minutes(snap.now.time) < minutes(school.end)
     const last = marksInOrder(kid).at(-1)
     return {
       tone: atSchool ? 'success' : late ? 'warning' : 'neutral',

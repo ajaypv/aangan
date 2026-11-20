@@ -106,8 +106,10 @@ function buildAttention(
 
     const kid = kidOf(snap, m.id)
     if (kid) {
-      const start = schoolToday(snap, m.id)?.start
-      if (kid.status !== 'at_school' && start !== undefined && minutes(snap.now.time) > minutes(start)) {
+      const school = schoolToday(snap, m.id)
+      const start = school?.start
+      const now = minutes(snap.now.time)
+      if (kid.status !== 'at_school' && school && now > minutes(school.start) && now < minutes(school.end)) {
         items.push({
           key: `late-${m.id}`,
           severity: 'warning',
