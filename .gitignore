@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+tools/
+
+backend/data/
+.env.local
+*.tmp
+.claude/
+agora-baseline/
+.agents/
+skills-lock.json

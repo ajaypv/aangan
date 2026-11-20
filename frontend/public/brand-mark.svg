@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <line id="ray" x1="64" y1="5" x2="64" y2="13"/>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="64" cy="34" r="13" fill="currentColor" stroke="none"/>
+    <use href="#ray"/>
+    <use href="#ray" transform="rotate(45 64 34)"/>
+    <use href="#ray" transform="rotate(-45 64 34)"/>
+    <use href="#ray" transform="rotate(90 64 34)"/>
+    <use href="#ray" transform="rotate(-90 64 34)"/>
+    <path d="M24 114 V100 A40 40 0 0 1 104 100 V114"/>
+    <path d="M46 114 V102 A18 18 0 0 1 82 102 V114"/>
+  </g>
+</svg>

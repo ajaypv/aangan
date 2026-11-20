@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#fbf9f8" />
+    <meta name="description" content="A family voice assistant that remembers everyone and gets things done." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Aangan" />
+    <title>Aangan</title>
+    <style>
+      /* Shown until the app loads: Redwood page colour, the brand-teal mark, the system font. */
+      html, body { background: #fbf9f8; }
+      .boot {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #fbf9f8;
+        color: #161513;
+        font: 700 16px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      }
+      .boot-inner { display: grid; justify-items: center; gap: 12px; }
+      .boot-mark { width: 64px; height: 64px; background: #00688c; mask: url('/brand-mark.svg') center / contain no-repeat; -webkit-mask: url('/brand-mark.svg') center / contain no-repeat; }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="boot" role="status" aria-label="Opening Aangan">
+        <div class="boot-inner">
+          <div class="boot-mark" aria-hidden="true"></div>
+          <p style="margin: 0">Aangan</p>
+        </div>
+      </div>
+    </div>
+    <noscript>Enable JavaScript to open Aangan.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

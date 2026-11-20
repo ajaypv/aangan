@@ -1,0 +1,14 @@
+**/node_modules
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/dist
+**/.env
+**/.env.local
+backend/data
+backend/tests
+agora-baseline
+tools
+.agents
+.claude
+.git

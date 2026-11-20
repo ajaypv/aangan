@@ -1,0 +1,29 @@
+# Render blueprint: New + > Blueprint, pick this repository. Secrets are entered in the dashboard (sync: false).
+# Free plan: no card, but the service sleeps after 15 minutes idle (about a minute to wake) and has no disk, so a
+# restart empties the household. Keep it awake with a free pinger on /api/config; switch `plan` to starter and add a
+# disk (mountPath /data) if the family must survive restarts.
+services:
+  - type: web
+    name: aangan
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/config
+    envVars:
+      - key: AANGAN_LANGUAGE_MODE
+        value: english
+      - key: AI_GATEWAY_MODEL
+        value: openai/gpt-4o-mini
+      - key: MURF_MODEL
+        value: FALCON
+      - key: AGORA_APP_ID
+        sync: false
+      - key: AGORA_APP_CERTIFICATE
+        sync: false
+      - key: MURF_API_KEY
+        sync: false
+      - key: AI_GATEWAY_API_KEY
+        sync: false
+      - key: LLM_API_KEY          # Bearer secret Agora sends to /v1/chat/completions: any long random string
+        generateValue: true
+      - key: PUBLIC_BASE_URL      # this service's own https address, for example https://aangan.onrender.com
+        sync: false

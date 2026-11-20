@@ -1,0 +1,344 @@
+@import './theme/redwood.css';
+@import 'tailwindcss';
+@import './heroui.css';
+
+/*
+ * Aangan uses Oracle's Redwood light theme. Every value comes from src/theme/redwood.css (the --rw-* tokens, copied from Oracle JET's
+ * oj-redwood.css). The short names below (bg, surface, ink, line, brand, btn...) are what the screens and Tailwind classes use; they are only
+ * aliases of those tokens, so a colour changes in one place. There is no dark theme: the page is always light.
+ */
+:root {
+  color-scheme: light;
+
+  --bg: var(--rw-bg-app);
+  --surface: var(--rw-bg-content);
+  --surface-2: var(--rw-bg-muted);
+  --surface-3: var(--rw-bg-subtle);
+  --ink: var(--rw-text-primary);
+  --ink-2: var(--rw-text-secondary);
+  --line: var(--rw-divider);
+  --edge: var(--rw-border-field);
+  --scrim: var(--rw-scrim);
+  --hover: var(--rw-bg-hover);
+  --active: var(--rw-bg-active);
+
+  /* Brand teal is for primary actions, the active navigation item and links; most of the interface is neutral. */
+  --btn: var(--rw-brand);
+  --btn-ink: var(--rw-brand-contrast);
+  --brand: var(--rw-brand);
+  --brand-hover: var(--rw-brand-hover);
+  --brand-ink: var(--rw-brand-contrast);
+  --brand-soft: var(--rw-bg-selected);
+  --brand-text: rgb(var(--rw-brand-120));
+  --selected-edge: var(--rw-border-selected);
+
+  --good-text: var(--rw-text-success);
+  --warn-ui: rgb(var(--rw-warning-100));
+  --marigold: rgb(var(--rw-warning-100));
+  --critical: var(--rw-danger);
+  --critical-text: var(--rw-text-danger);
+
+  /* Status chips: a tint (step 20) behind text (step 120); each pair is at least 5:1. */
+  --success-bg: var(--rw-success-bg);
+  --warning-bg: var(--rw-warning-bg);
+  --danger-bg: var(--rw-danger-bg);
+  --info-bg: var(--rw-info-bg);
+  --info-text: var(--rw-info);
+
+  /* One hue per agent, from the Redwood data-visualisation palette. */
+  --agent-travel: rgb(var(--rw-dvt-1));
+  --agent-calendar: rgb(var(--rw-dvt-10));
+  --agent-dining: rgb(var(--rw-dvt-2));
+  --agent-school: rgb(var(--rw-dvt-12));
+  --agent-care: rgb(var(--rw-dvt-6));
+  --agent-household: rgb(var(--rw-dvt-9));
+  --agent-orchestrator: rgb(var(--rw-neutral-90));
+
+  /* shadcn / AI Elements read these; they all come from the tokens above. */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-ink);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--ink-2);
+  --accent: var(--surface-2);
+  --accent-foreground: var(--ink);
+  --destructive: var(--critical);
+  --border: var(--line);
+  --input: var(--edge);
+  --ring: var(--rw-focus-ring);
+  --radius: var(--rw-radius-lg);
+}
+
+/* There is no dark theme. This keeps any leftover dark: utility (AI Elements ships some) from ever matching. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme inline {
+  --font-sans: var(--rw-font);
+  --font-display: var(--rw-font);
+  --font-mono: var(--rw-font-mono);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-line: var(--line);
+  --color-edge: var(--edge);
+  --color-hover: var(--hover);
+  --color-btn: var(--btn);
+  --color-btn-ink: var(--btn-ink);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-text: var(--brand-text);
+  --color-marigold: var(--marigold);
+  --color-good: var(--good-text);
+  --color-warn: var(--warn-ui);
+  --color-critical: var(--critical-text);
+  --color-success-bg: var(--success-bg);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger-bg: var(--danger-bg);
+  --color-info-bg: var(--info-bg);
+  --color-info: var(--info-text);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Redwood is squarer than a phone-style interface: 2, 4, 6 and 8 px. Larger Tailwind steps are pulled in to match. */
+  --radius-sm: var(--rw-radius-sm);
+  --radius-md: var(--rw-radius-md);
+  --radius-lg: var(--rw-radius-lg);
+  --radius-xl: var(--rw-radius-xl);
+  --radius-2xl: var(--rw-radius-xl);
+  --radius-3xl: var(--rw-radius-xl);
+
+  --shadow-xs: var(--rw-shadow-xs);
+  --shadow-sm: var(--rw-shadow-sm);
+  --shadow-md: var(--rw-shadow-md);
+  --shadow-lg: var(--rw-shadow-lg);
+  --shadow-xl: var(--rw-shadow-lg);
+
+  --text-xs: var(--rw-text-xs);
+  --text-xs--line-height: 1.333;
+  --text-sm: var(--rw-text-sm);
+  --text-sm--line-height: 1.4;
+  --text-base: var(--rw-text-md);
+  --text-base--line-height: 1.5;
+  --text-lg: var(--rw-text-lg);
+  --text-lg--line-height: 1.4;
+  --text-xl: var(--rw-text-xl);
+  --text-xl--line-height: 1.4;
+  --text-2xl: var(--rw-heading-sm);
+  --text-2xl--line-height: 1.333;
+}
+
+/* Short screens, such as a phone held sideways. */
+@custom-variant short (@media (max-height: 30rem));
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+  html {
+    accent-color: var(--brand);
+    -webkit-text-size-adjust: 100%;
+    font-family: var(--rw-font);
+    font-size: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: var(--rw-text-md);
+    line-height: var(--rw-line-body);
+    font-weight: var(--rw-weight-body);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1,
+  h2 {
+    font-weight: var(--rw-weight-heading);
+    line-height: var(--rw-line-tight);
+  }
+  h3,
+  h4 {
+    font-weight: var(--rw-weight-sub);
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+  /* No double-tap zoom delay on anything you press. */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [role='button'],
+  [role='switch'],
+  [role='radio'] {
+    touch-action: manipulation;
+  }
+  /* Native select menus follow the light palette on every platform. */
+  select {
+    background-color: var(--surface);
+    color: var(--ink);
+  }
+  /* One focus ring everywhere: 2px, near-black, offset 2px. */
+  :focus-visible {
+    outline: 2px solid var(--rw-focus-ring);
+    outline-offset: 2px;
+  }
+  button,
+  [role='button'],
+  summary {
+    cursor: pointer;
+  }
+  ::selection {
+    background: var(--brand-soft);
+  }
+}
+
+/* Thin scrollbars on desktop; phones use their own overlay bars. Chip rows that scroll sideways hide theirs with .no-scrollbar. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--rw-neutral-60)) transparent;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* The app is a fixed frame with one scrolling area inside it; the page itself never scrolls. */
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+/* Phones held sideways with a notch: keep content out of the cut-outs. */
+#root {
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+}
+/* No rubber-band bounce of the whole page with a mouse or trackpad; phones keep their pull-to-refresh. */
+@media (pointer: fine) {
+  html {
+    overscroll-behavior: none;
+  }
+}
+
+@layer components {
+  /* Type scale (Redwood): page title, section title, card title, secondary text, caption. */
+  .t-page {
+    font-size: var(--rw-heading-sm);
+    font-weight: var(--rw-weight-heading);
+    line-height: 1.3333;
+  }
+  .t-section {
+    font-size: var(--rw-heading-xs);
+    font-weight: var(--rw-weight-heading);
+    line-height: 1.4;
+  }
+  .t-card {
+    font-size: var(--rw-text-md);
+    font-weight: var(--rw-weight-sub);
+    line-height: 1.5;
+  }
+  .t-secondary {
+    font-size: var(--rw-text-sm);
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+  .t-caption {
+    font-size: var(--rw-text-xs);
+    line-height: 1.3333;
+    color: var(--ink-2);
+  }
+}
+
+.font-display {
+  font-family: var(--rw-font);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes aangan-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+@keyframes aangan-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes aangan-skeleton {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.rise {
+  animation: aangan-rise var(--rw-duration-medium) var(--rw-ease-out) both;
+}
+.listening {
+  animation: aangan-pulse 1.4s ease-out infinite;
+}
+.skeleton {
+  background: var(--surface-2);
+  border-radius: var(--rw-radius-lg);
+  animation: aangan-skeleton 1.4s var(--rw-ease-in-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .listening,
+  .skeleton {
+    animation: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

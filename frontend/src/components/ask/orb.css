@@ -1,0 +1,98 @@
+/* The voice orb: a flat core that swells with the audio level, with rings that say what Aangan is doing. No gradients. */
+.orb {
+  --lvl: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--orb-size, 112px);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+}
+
+.orb__core {
+  display: grid;
+  place-items: center;
+  width: 54%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: rgb(var(--rw-brand-120));
+  color: rgb(var(--rw-neutral-0));
+  transform: scale(calc(1 + var(--lvl) * 0.26));
+  transition: transform 90ms linear, background-color var(--rw-duration-medium) var(--rw-ease-in-out);
+}
+
+.orb__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid rgb(var(--rw-brand-100) / 0.4);
+  opacity: 0;
+}
+
+.orb[data-state='connecting'] .orb__core,
+.orb[data-state='muted'] .orb__core {
+  background: rgb(var(--rw-neutral-100));
+}
+
+.orb[data-state='speaking'] .orb__core {
+  background: rgb(var(--rw-dvt-2));
+}
+.orb[data-state='speaking'] .orb__ring {
+  border-color: rgb(var(--rw-dvt-2) / 0.45);
+}
+
+.orb[data-state='thinking'] .orb__ring--a {
+  opacity: 1;
+  border-style: dashed;
+  border-color: rgb(var(--rw-brand-100) / 0.7);
+  animation: orb-spin 3.2s linear infinite;
+}
+
+.orb[data-state='listening'] .orb__ring,
+.orb[data-state='speaking'] .orb__ring,
+.orb[data-state='connecting'] .orb__ring {
+  animation: orb-ring 2.6s var(--rw-ease-out) infinite;
+}
+.orb[data-state='speaking'] .orb__ring {
+  animation-duration: 1.6s;
+}
+.orb[data-state='listening'] .orb__ring--b,
+.orb[data-state='speaking'] .orb__ring--b,
+.orb[data-state='connecting'] .orb__ring--b {
+  animation-delay: 1.3s;
+}
+.orb[data-state='speaking'] .orb__ring--b {
+  animation-delay: 0.8s;
+}
+
+@keyframes orb-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+}
+
+@keyframes orb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb__ring {
+    animation: none !important;
+  }
+  .orb[data-state='listening'] .orb__ring--a,
+  .orb[data-state='speaking'] .orb__ring--a {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+  .orb__core {
+    transform: none;
+    transition: none;
+  }
+}
