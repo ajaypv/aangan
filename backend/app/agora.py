@@ -11,7 +11,7 @@ import secrets
 from agora_agent import Agent, Agora, Area
 from agora_agent.agentkit import CustomLLM, DeepgramSTT, MurfTTS, expires_in_hours, generate_client_token
 
-from . import voices
+from . import languages, voices
 from .config import Settings
 from .state import FamilyState
 
@@ -54,14 +54,27 @@ def _client(cfg: Settings) -> Agora:
     return Agora(area=Area.US, app_id=cfg.agora_app_id, app_certificate=cfg.agora_app_certificate)
 
 
+def _opening_language(state: FamilyState, member_id: str):
+    """In multi-language mode the call opens in the member's own language; after that it follows what is said."""
+    if voices.language_mode() != "multi":
+        return None
+    return languages.for_member(state.member(member_id).get("language"))
+
+
 def greeting_for(state: FamilyState, member_id: str) -> str:
     member = state.member(member_id)
+    opening = _opening_language(state, member_id)
+    if opening:
+        return languages.GREETING[opening.code].format(name=member["name"])
     if state.speaks_hindi(member_id):
         return f"Namaste {member['name']}, Aangan yahan hai. Bataiye, aaj main kya karun?"
     return f"Hello {member['name']}, Aangan here. What can I do for the family today?"
 
 
 def failure_message_for(state: FamilyState, member_id: str) -> str:
+    opening = _opening_language(state, member_id)
+    if opening:
+        return languages.FAILURE[opening.code]
     return "Ek second, dobara bolenge?" if state.speaks_hindi(member_id) else "One moment, could you say that again?"
 
 

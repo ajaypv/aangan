@@ -59,14 +59,14 @@ def props_of(sent: dict) -> dict:
 
 # --- language mode
 
-def test_default_language_mode_is_english(monkeypatch):
+def test_default_language_mode_is_multi(monkeypatch):
     monkeypatch.delenv("AANGAN_LANGUAGE_MODE", raising=False)
     monkeypatch.setattr("app.config.load_dotenv", lambda *a, **k: None)
-    assert settings().language_mode == "english"
+    assert settings().language_mode == "multi"
     monkeypatch.setenv("AANGAN_LANGUAGE_MODE", "native")
     assert settings().language_mode == "native"
     monkeypatch.setenv("AANGAN_LANGUAGE_MODE", "klingon")
-    assert settings().language_mode == "english"
+    assert settings().language_mode == "multi"
 
 
 def test_english_mode_puts_every_member_on_en_in(english):

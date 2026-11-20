@@ -26,7 +26,8 @@ RELATIONS = {
 _REL_ALT = "|".join(sorted(RELATIONS, key=len, reverse=True))
 KINDS = ["adult", "child", "senior"]
 GENDERS = ["female", "male"]
-LANGUAGES = ["English", "Hindi", "Hinglish"]
+LANGUAGES = ["English", "Hindi", "Hinglish", "Telugu", "Kannada"]
+_LOCALES = {"Hindi": "hi-IN", "Telugu": "te-IN", "Kannada": "kn-IN"}  # everything else speaks en-IN
 
 _ADD = re.compile(
     r"\b(meet|add|welcome|introduce|joining|joins|this is|here is|here's|say hello to|yeh|ye|milo|miliye)\b[^.?!]*"
@@ -172,7 +173,7 @@ def _add_member(
     relation = (relation or "").strip().title() or "Family"
     member = {
         "id": member_id, "name": name, "relation": relation, "age": age, "kind": kind,
-        "language": language, "locale": "hi-IN" if language == "Hindi" else "en-IN",
+        "language": language, "locale": _LOCALES.get(language, "en-IN"),
         "gender": gender or infer_gender({"relation": relation}), "voice_id": None,
         "color": color, "about": about or "New to the family",
     }
@@ -231,7 +232,7 @@ def _update_member(
         member["kind"] = kind
     if language is not None:
         member["language"] = language
-        member["locale"] = "hi-IN" if language == "Hindi" else "en-IN"
+        member["locale"] = _LOCALES.get(language, "en-IN")
     if gender is not None:
         member["gender"] = gender
     _init_domains(state, member)

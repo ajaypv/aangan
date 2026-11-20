@@ -71,7 +71,7 @@ export function ConnectionChips({ compact = false, className }: { compact?: bool
         </Pill>
       </li>
       <li>
-        <Pill>{config.language_mode === 'native' ? 'Native languages' : 'English'}</Pill>
+        <Pill>{config.language_mode === 'multi' ? 'English · हि · తె · ಕ' : config.language_mode === 'native' ? 'Native languages' : 'English'}</Pill>
       </li>
       {!compact && (
         <li>

@@ -11,6 +11,27 @@ def _env(name: str, default: str = "") -> str:
     return os.getenv(name, default).strip()
 
 
+LANGUAGE_MODES = ("multi", "english", "native")
+_language_override: str | None = None
+
+
+def set_language_override(mode: str | None) -> None:
+    """The household's own choice (Settings), which beats AANGAN_LANGUAGE_MODE. None goes back to the environment's default."""
+    global _language_override
+    _language_override = mode if mode in LANGUAGE_MODES else None
+
+
+def language_override() -> str | None:
+    return _language_override
+
+
+def _language_mode() -> str:
+    """multi (default): English, Hindi, Telugu and Kannada, following what is said. english: English only.
+    native: each member's own language, as before."""
+    mode = (_language_override or _env("AANGAN_LANGUAGE_MODE", "multi")).lower()
+    return mode if mode in LANGUAGE_MODES else "multi"
+
+
 @dataclass(frozen=True)
 class Settings:
     agora_app_id: str
@@ -25,6 +46,7 @@ class Settings:
     openai_model: str
     ai_gateway_api_key: str
     ai_gateway_model: str
+    ai_gateway_model_indic: str  # the model for Hindi, Telugu and Kannada turns: it writes those languages far better
     openai_reasoning: str  # optional reasoning effort for the OpenAI brain ("low", "medium", ...); empty leaves the model default
     language_mode: str  # "english": everything in English; "native": Hindi/Hinglish for members who speak it
     chat_host: str
@@ -108,7 +130,8 @@ def settings() -> Settings:
         openai_reasoning=_env("OPENAI_REASONING"),
         ai_gateway_api_key=_env("AI_GATEWAY_API_KEY"),
         ai_gateway_model=_env("AI_GATEWAY_MODEL"),
-        language_mode="native" if _env("AANGAN_LANGUAGE_MODE", "english").lower() == "native" else "english",
+        ai_gateway_model_indic=_env("AI_GATEWAY_MODEL_INDIC", "google/gemini-2.5-flash"),
+        language_mode=_language_mode(),
         chat_host=_env("AGORA_CHAT_HOST"),
         chat_app_id=_env("AGORA_CHAT_APP_ID"),
         chat_app_token=_env("AGORA_CHAT_APP_TOKEN"),

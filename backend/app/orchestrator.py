@@ -5,6 +5,7 @@ import re
 import threading
 import time
 
+from . import languages
 from .agents import BY_NAME, REGISTRY
 from .config import settings
 from .normalize import normalize
@@ -74,7 +75,7 @@ _EXPLAIN = re.compile(
 )
 _SMALL_TALK = (_THANKS, _BYE, _GREETING)
 FILLER = "One moment."
-FILLER_AFTER_S = 2.0  # silence this long before the first word and the voice gets a short filler
+FILLER_AFTER_S = 3.0  # silence this long before the first word and the voice gets a short filler
 
 
 def _prepare(state, member_id: str, text: str) -> None:
@@ -136,19 +137,27 @@ def _finish(state, member_id: str, agent_name: str, reply: str, english: bool) -
     return speakable(reply) if english else reply
 
 
+def _turn_language(text: str) -> str | None:
+    """In multi-language mode, the language this message is in (en, hi, te or kn) from its script; otherwise None."""
+    return languages.detect(text) if settings().language_mode == "multi" else None
+
+
 def converse(state, member_id: str, text: str) -> str:
     _prepare(state, member_id, text)
     cfg = settings()
-    english = not state.speaks_hindi(member_id)
+    lang = _turn_language(text)
+    rules_english = not state.speaks_hindi(member_id)  # the rule engine answers in English (or Hinglish in native mode)
+    english = rules_english and lang in (None, "en")  # what the model wrote is read as English only when it is
 
     if cfg.llm_ready:
-        fast = _fast_rule_reply(state, member_id, text, english)
+        # the rule engine's quick answer is for English; Hindi, Telugu and Kannada always go to the model
+        fast = None if lang not in (None, "en") else _fast_rule_reply(state, member_id, text, rules_english)
         if fast:
-            return _finish(state, member_id, fast[0], fast[1], english)
+            return _finish(state, member_id, fast[0], fast[1], rules_english)
         try:
             from . import llm
 
-            reply = llm.converse(state, member_id, text)
+            reply = llm.converse(state, member_id, text, lang=lang)
             state.say("agent", reply, member_id, agent="aangan")
             return speakable(reply) if english else reply
         except Exception as exc:  # LLM unavailable: fall back to the built-in rule engine
@@ -156,11 +165,11 @@ def converse(state, member_id: str, text: str) -> str:
 
     # the rule engine matches romanised Hinglish and plain digits; the LLM path reads raw speech itself
     clean = clean_input(normalize(text), state.members)
-    agent_name, reply = _rule_reply(state, member_id, clean, text, english)
-    return _finish(state, member_id, agent_name, reply, english)
+    agent_name, reply = _rule_reply(state, member_id, clean, text, rules_english)
+    return _finish(state, member_id, agent_name, reply, rules_english)
 
 
-_SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+_SENTENCE_END = re.compile(r"(?<=[.!?।])\s+")  # the Hindi full stop is the danda
 
 
 def _sentences(pieces):
@@ -215,29 +224,33 @@ def converse_stream(state, member_id: str, text: str):
     """Yield the reply a sentence at a time, as soon as each sentence is ready (what the voice endpoint streams)."""
     _prepare(state, member_id, text)
     cfg = settings()
-    english = not state.speaks_hindi(member_id)
+    lang = _turn_language(text)
+    rules_english = not state.speaks_hindi(member_id)
+    english = rules_english and lang in (None, "en")
+    holds = set(languages.HOLD.values())
 
     if cfg.llm_ready:
-        fast = _fast_rule_reply(state, member_id, text, english)
+        fast = None if lang not in (None, "en") else _fast_rule_reply(state, member_id, text, rules_english)
         if fast:
-            yield _finish(state, member_id, fast[0], fast[1], english)
+            yield _finish(state, member_id, fast[0], fast[1], rules_english)
             return
         spoken: list[str] = []
         try:
             from . import llm
 
-            for sentence in _with_filler(_sentences(llm.stream(state, member_id, text)), FILLER_AFTER_S, FILLER):
+            filler = languages.HOLD[lang or "en"]
+            for sentence in _with_filler(_sentences(llm.stream(state, member_id, text, lang=lang)), FILLER_AFTER_S, filler):
                 spoken.append(sentence)
                 yield speakable(sentence) if english else sentence
         except Exception as exc:
             state.log("orchestrator", "llm_fallback", {}, "error", {"error": str(exc)[:200]}, 0)
         if spoken:  # the transcript keeps what was said, without the filler
-            state.say("agent", " ".join(s for s in spoken if s != FILLER), member_id, agent="aangan")
+            state.say("agent", " ".join(s for s in spoken if s not in holds), member_id, agent="aangan")
             return  # even after an error: part of the answer is already spoken, so end it rather than repeat
 
     clean = clean_input(normalize(text), state.members)
-    agent_name, reply = _rule_reply(state, member_id, clean, text, english)
-    yield _finish(state, member_id, agent_name, reply, english)
+    agent_name, reply = _rule_reply(state, member_id, clean, text, rules_english)
+    yield _finish(state, member_id, agent_name, reply, rules_english)
 
 
 def run_trigger(state, agent_name: str, trigger: str) -> str:

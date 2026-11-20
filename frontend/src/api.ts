@@ -54,6 +54,8 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
 export const api = {
   state: () => request<Snapshot>('/state'),
   config: () => request<AppConfig>('/config'),
+  /** `multi`: English, Hindi, Telugu and Kannada following what is said. `english`: English only. */
+  language: (mode: 'multi' | 'english') => request<AppConfig>('/language', { mode }),
   tools: () => request<ToolSpec[]>('/tools'),
   converse: (member_id: string, message: string) => request<{ reply: string; state: Snapshot }>('/converse', { member_id, message }),
   trigger: (agent: string, name: string) => request<{ reply: string | null; state: Snapshot }>(`/trigger/${agent}/${name}`, {}),

@@ -34,3 +34,13 @@ def scripted_clock(monkeypatch):
     """The suites assert the demo's scripted morning (Friday 2026-11-20 07:30). The real default follows the clock;
     tests of that set AANGAN_CLOCK=real themselves."""
     monkeypatch.setenv("AANGAN_CLOCK", "scripted")
+
+
+@pytest.fixture(autouse=True)
+def no_language_override():
+    """A household's language choice (Settings) is global state: every test starts without one."""
+    from app import config
+
+    config.set_language_override(None)
+    yield
+    config.set_language_override(None)

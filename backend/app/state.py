@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 import httpx
 
 from . import chat, seed
-from .config import settings
+from .config import language_override, set_language_override, settings
 
 DEMO_ENV = "AANGAN_DEMO_ON_START"
 MAX_EVENTS_SAVED = 200
@@ -105,8 +105,8 @@ class FamilyState:
 
     def reply_language(self, member_id: str) -> str:
         """Language Aangan answers this member in: always English in english mode, else the member's own."""
-        if settings().language_mode == "english":
-            return "English"
+        if settings().language_mode in ("english", "multi"):
+            return "English"  # multi-language mode reads the language from each message instead (see languages.detect)
         return self.member(member_id)["language"]
 
     def speaks_hindi(self, member_id: str) -> bool:
@@ -166,6 +166,7 @@ class FamilyState:
             "transcript": self.transcript[-MAX_TRANSCRIPT_SAVED:],
             "persona": self.persona,
             "now": self.now if self.demo else None,
+            "language_mode": language_override(),  # the household's own choice in Settings, if it made one
         }
 
     def apply_dict(self, data: dict) -> None:
@@ -189,6 +190,7 @@ class FamilyState:
         saved_now = data.get("now")
         self.now = dict(saved_now) if self.demo and _scripted_clock() and isinstance(saved_now, dict) else _real_now()
         self.pending, self.stage, self.chaos = None, "before", False
+        set_language_override(data.get("language_mode"))
 
     def snapshot(self) -> dict:
         from .agents import REGISTRY

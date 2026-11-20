@@ -1,5 +1,6 @@
 import { Download, Play, RotateCcw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { api } from '@/api'
 import { MemberForm } from '@/components/family/MemberForm'
 import { usePwa } from '@/pwa/PwaProvider'
 import { useApp } from '@/state/AppState'
@@ -148,6 +149,38 @@ function InstallCard() {
   )
 }
 
+/** Speak or type in English, Hindi, Telugu or Kannada: Aangan answers in the language it hears. One switch turns that off. */
+function LanguageCard() {
+  const { config, reload, notify } = useApp()
+  const [saving, setSaving] = useState(false)
+  if (!config?.language_mode || config.language_mode === 'native') return null
+  const multi = config.language_mode === 'multi'
+  const change = async (on: boolean) => {
+    setSaving(true)
+    try {
+      await api.language(on ? 'multi' : 'english')
+      reload()
+      notify('success', on ? 'Aangan now follows your language. The next call uses it.' : 'Aangan speaks English only. The next call uses it.')
+    } catch {
+      notify('error', 'Could not change the language. Try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+  return (
+    <Card className="mt-3 space-y-3 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="t-card">Speak in your language</p>
+          <p className="t-secondary">Aangan understands and answers in English, हिन्दी, తెలుగు and ಕನ್ನಡ, whichever you speak or type.</p>
+        </div>
+        <Switch label="Speak in your language" checked={multi} disabled={saving} onChange={(on) => void change(on)} />
+      </div>
+      {multi && <p className="t-caption">Say or type something in any of the four and the reply and the voice switch to match. A call already in progress keeps its language until the next one.</p>}
+    </Card>
+  )
+}
+
 function ServiceRow({ name, what, status }: { name: string; what: string; status: ServiceStatus | undefined }) {
   const ok = status?.configured ?? false
   return (
@@ -203,13 +236,14 @@ export function SettingsScreen() {
             <ServiceRow key={s.key} name={s.name} what={s.what} status={config?.services[s.key]} />
           ))}
         </ListCard>
+        <LanguageCard />
         {(unconnected.length > 0 || config?.language_mode) && (
           <details className="group mt-3 rounded-md border border-line bg-surface">
             <summary className="flex min-h-11 cursor-pointer list-none items-center px-4 text-sm font-semibold lg:min-h-9">Connection details</summary>
             <div className="space-y-3 border-t border-line px-4 py-3 text-sm">
               {config?.language_mode && (
                 <p className="t-secondary">
-                  Language: <span className="font-semibold text-ink">{config.language_mode === 'english' ? 'English' : 'Each person’s own language'}</span>
+                  Language: <span className="font-semibold text-ink">{config.language_mode === 'english' ? 'English' : config.language_mode === 'multi' ? 'English, हिन्दी, తెలుగు, ಕನ್ನಡ (follows what is said)' : 'Each person’s own language'}</span>
                 </p>
               )}
               {unconnected.length === 0 ? (

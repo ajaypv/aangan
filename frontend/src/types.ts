@@ -15,7 +15,7 @@ export interface Member {
   gender?: 'female' | 'male' | string
 }
 
-export type MemberLanguage = 'English' | 'Hindi' | 'Hinglish'
+export type MemberLanguage = 'English' | 'Hindi' | 'Hinglish' | 'Telugu' | 'Kannada'
 export type MemberGender = 'female' | 'male'
 
 /** What the household tools take to add or change a person. */
@@ -178,7 +178,8 @@ export interface AppConfig {
   voices: Record<string, { name: string; locale: string; gender: string; language: string }>
   tts: { vendor: string; model: string }
   llm_url: string | null
-  language_mode?: 'english' | 'native'
+  language_mode?: 'multi' | 'english' | 'native'
+  languages?: { code: string; name: string; native: string }[]
 }
 
 export interface ToolSpec {
@@ -204,5 +205,5 @@ export interface VoiceSession {
   member_id: string
   status: string
   voice?: { name: string; voice_id?: string; locale: string; gender: string; language: string }
-  language_mode?: 'english' | 'native'
+  language_mode?: 'multi' | 'english' | 'native'
 }

@@ -3,7 +3,7 @@ import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { DIET_OPTIONS, RELATION_SUGGESTIONS, ROLES, draftToArgs, guessGender, memberToDraft, validateDraft, emptyDraft, type DraftErrors, type FormVariant, type MemberDraft } from '@/lib/household'
 import { cn } from '@/lib/utils'
 import { useApp } from '@/state/AppState'
-import type { Member, MemberGender } from '@/types'
+import type { Member, MemberGender, MemberLanguage } from '@/types'
 import { Button, Field, inputClass } from '@/ui/primitives'
 import { Sheet } from '@/ui/Sheet'
 
@@ -67,6 +67,13 @@ function Choices<T extends string>({
 const VOICE_OPTIONS: { value: MemberGender; label: string }[] = [
   { value: 'female', label: 'Female voice' },
   { value: 'male', label: 'Male voice' },
+]
+
+const LANGUAGE_OPTIONS: { value: MemberLanguage; label: string }[] = [
+  { value: 'English', label: 'English' },
+  { value: 'Hindi', label: 'हिन्दी' },
+  { value: 'Telugu', label: 'తెలుగు' },
+  { value: 'Kannada', label: 'ಕನ್ನಡ' },
 ]
 
 /**
@@ -238,6 +245,14 @@ export function MemberForm({
         }}
         options={VOICE_OPTIONS}
         error={errors.gender}
+      />
+
+      <Choices
+        legend="Language Aangan opens with"
+        hint="Aangan answers in whatever language you speak or type: English, Hindi, Telugu or Kannada. This is the one it greets you in."
+        value={draft.language === 'Hinglish' ? 'Hindi' : draft.language}
+        onChange={(l) => set('language', l)}
+        options={LANGUAGE_OPTIONS}
       />
 
       {extras}

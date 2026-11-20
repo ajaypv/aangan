@@ -13,6 +13,7 @@ from types import SimpleNamespace
 
 import anthropic
 
+from . import languages
 from .agents import REGISTRY
 from .config import settings
 from .toolkit import Tool, ToolError, run_parallel, run_tool
@@ -67,7 +68,7 @@ def _guarded(tool: Tool) -> Tool:
     return dataclasses.replace(tool, fn=fn)
 
 
-def build_system(state, member_id: str) -> list[dict]:
+def build_system(state, member_id: str, lang: str | None = None) -> list[dict]:
     names = {m["id"]: m["name"] for m in state.members}
     roster = "\n".join(
         f"- {m['name']} ({m['relation']}, {m['age']}, speaks {state.reply_language(m['id'])}) [id: {m['id']}]" for m in state.members
@@ -84,6 +85,13 @@ def build_system(state, member_id: str) -> list[dict]:
         "Hinglish": "Hinglish (Hindi and English mixed, Latin script)",
     }.get(state.reply_language(member_id), state.reply_language(member_id))  # english mode: English for everyone
     weekday = date.fromisoformat(state.now["date"]).strftime("%A")
+    if lang:  # multi-language mode: the language of this message, found from its script, decides the reply
+        chosen = languages.LANGUAGES[lang]
+        language = (
+            f"{chosen.name}. The user's latest message is in {chosen.name}: answer only in {chosen.name}, written in {chosen.script}, "
+            f"even if earlier messages used another language, and write numbers, amounts and times as words in {chosen.name}. "
+            "Names of people and places may stay as they are"
+        )
 
     return [
         {
@@ -118,7 +126,9 @@ def _text(response) -> str:
     return " ".join(b.text for b in response.content if b.type == "text" and b.text).strip()
 
 
-def _apology(state, member_id: str) -> str:
+def _apology(state, member_id: str, lang: str | None = None) -> str:
+    if lang and lang != "en":
+        return languages.SORRY[lang]
     if state.speaks_hindi(member_id):
         return "Maaf kijiye, main yeh poora nahi kar paaya. Kripya dobara bolein."
     return "Sorry, I couldn't finish that. Please try again."
@@ -283,7 +293,7 @@ def _pick_index(state, text: str, index: dict[str, tuple]) -> dict[str, tuple]:
     return {key: value for key, value in index.items() if value[0].name in keep}
 
 
-def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool = True):
+def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool = True, lang: str | None = None):
     """Chat Completions through Vercel AI Gateway, streamed: text is yielded the moment the model produces it, tool
     calls are collected and run, and the loop continues until the model answers in words.
 
@@ -299,15 +309,18 @@ def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool
         {"type": "function", "function": {"name": key, "description": tool.description, "parameters": tool.parameters}}
         for key, (_, tool) in index.items()
     ]
-    messages: list[dict] = [{"role": "system", "content": _system_text(build_system(state, member_id))}]
+    messages: list[dict] = [{"role": "system", "content": _system_text(build_system(state, member_id, lang))}]
     messages += _history(state, member_id, text) + [{"role": "user", "content": text}]
     spoke, tail, led = False, "", False
+    indic = bool(lang and lang != "en")
+    model = cfg.ai_gateway_model_indic if indic else cfg.ai_gateway_model_name  # Hindi, Telugu, Kannada: the model that writes them well
+    reasoning = cfg.openai_reasoning if not indic else ""  # reasoning effort is an OpenAI setting; the Indic model does not take it
 
     for round_no in range(MAX_ITERATIONS):
         state.stage = "during"
-        kwargs = {"model": cfg.ai_gateway_model_name, "messages": list(messages), "max_tokens": MAX_TOKENS, "stream": True}
-        if cfg.openai_reasoning:
-            kwargs["reasoning_effort"] = cfg.openai_reasoning
+        kwargs = {"model": model, "messages": list(messages), "max_tokens": MAX_TOKENS, "stream": True}
+        if reasoning:
+            kwargs["reasoning_effort"] = reasoning
         if tools:
             kwargs["tools"] = tools
 
@@ -326,7 +339,9 @@ def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool
                 tail = piece or tail
                 yield piece
             for tc in delta.tool_calls or []:
-                slot = calls.setdefault(tc.index, {"id": "", "name": "", "arguments": ""})
+                # some models (Gemini) send no index: a chunk with a new id starts a call, one without continues the last
+                key = tc.index if tc.index is not None else (len(calls) - 1 if calls and not tc.id else len(calls))
+                slot = calls.setdefault(key, {"id": "", "name": "", "arguments": ""})
                 slot["id"] = tc.id or slot["id"]
                 if tc.function:
                     slot["name"] += tc.function.name or ""
@@ -334,13 +349,13 @@ def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool
                 if lead_in and not led and not content.strip() and not round_no and slot["name"]:
                     # the model chose a tool: speak now, while it is still writing the arguments and the tool runs
                     led = True
-                    tail = LEAD_INS.get(slot["name"].split(SEP)[0], DEFAULT_LEAD_IN) + " "
+                    tail = (languages.LOOKING[lang] if indic else LEAD_INS.get(slot["name"].split(SEP)[0], DEFAULT_LEAD_IN)) + " "
                     spoke = True
                     yield tail
 
         if not calls:
             if not content.strip():  # nothing said in words (a lead-in does not count): never leave the caller in silence
-                yield (" " if spoke else "") + _apology(state, member_id)
+                yield (" " if spoke else "") + _apology(state, member_id, lang)
             return
 
         ordered = [calls[i] for i in sorted(calls)]
@@ -359,29 +374,26 @@ def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool
         for result in _run_tool_blocks(state, full_index, blocks):
             messages.append({"role": "tool", "tool_call_id": result["tool_use_id"], "content": result["content"]})
 
-    if not spoke:
-        yield _apology(state, member_id)
-    else:
-        yield " " + _apology(state, member_id)
+    yield ("" if not spoke else " ") + _apology(state, member_id, lang)
 
 
-def _converse_gateway(state, member_id: str, text: str, client=None) -> str:
-    return "".join(_gateway_stream(state, member_id, text, client, lead_in=False)).strip()
+def _converse_gateway(state, member_id: str, text: str, client=None, lang: str | None = None) -> str:
+    return "".join(_gateway_stream(state, member_id, text, client, lead_in=False, lang=lang)).strip()
 
 
-def stream(state, member_id: str, text: str):
+def stream(state, member_id: str, text: str, lang: str | None = None):
     """The reply as text pieces, as they are produced. Only the gateway provider streams; the others yield the whole reply."""
     if settings().llm_provider == "gateway":
-        yield from _gateway_stream(state, member_id, text)
+        yield from _gateway_stream(state, member_id, text, lang=lang)
     else:
-        yield converse(state, member_id, text)
+        yield converse(state, member_id, text, lang=lang)
 
 
-def converse(state, member_id: str, text: str, client=None, provider: str | None = None) -> str:
+def converse(state, member_id: str, text: str, client=None, provider: str | None = None, lang: str | None = None) -> str:
     cfg = settings()
     provider = provider or cfg.llm_provider or "anthropic"
     if provider == "gateway":
-        return _converse_gateway(state, member_id, text, client)
+        return _converse_gateway(state, member_id, text, client, lang)
     if provider == "openai":
         return _converse_openai(state, member_id, text, client)
     return _converse_anthropic(state, member_id, text, client)

@@ -15,9 +15,9 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
-from . import agora, impact, orchestrator, persistence, voices
+from . import agora, impact, languages, orchestrator, persistence, voices
 from .agents import BY_NAME, REGISTRY
-from .config import settings
+from .config import set_language_override, settings
 from .state import DEMO_ENV, STATE
 from .toolkit import run_tool
 
@@ -124,10 +124,25 @@ def get_config():
         "brain": "llm" if cfg.llm_ready else "rules",
         "llm": {"provider": cfg.llm_provider, "model": cfg.llm_model_name} if cfg.llm_ready else None,
         "language_mode": cfg.language_mode,
+        "languages": [{"code": l.code, "name": l.name, "native": l.native} for l in languages.LANGUAGES.values()],
         "voices": {m["id"]: voices.voice_for(m) for m in STATE.members},
         "tts": {"vendor": "murf", "model": cfg.murf_model},
         "llm_url": f"{cfg.public_base_url}/v1/chat/completions" if cfg.public_base_url else None,
     }
+
+
+class LanguageChoice(BaseModel):
+    mode: str
+
+
+@app.post("/api/language")
+def set_language(choice: LanguageChoice):
+    """The household's language choice: `multi` (English, Hindi, Telugu, Kannada, following what is said) or `english`.
+    A voice call in progress keeps the language it started with; the next call uses the new one."""
+    if choice.mode not in ("multi", "english"):
+        raise HTTPException(400, "mode must be multi or english")
+    set_language_override(choice.mode)
+    return get_config()
 
 
 @app.get("/api/state")
@@ -275,6 +290,15 @@ def chat_completions(
     def stream():
         """Agora's speech engine starts talking on the first words, so every sentence is sent the moment it is ready."""
         base = {"id": completion_id, "object": "chat.completion.chunk", "created": created, "model": model}
+        lang = orchestrator._turn_language(content)
+        if lang:
+            # Multi-language mode: Agora reads this first chunk and points the Murf voice at the language being spoken to
+            # (the same multi-native voice, a different locale), before any text arrives.
+            speak = languages.tts_params(lang, voices.infer_gender(STATE.member(member_id)))
+            STATE.log("voice", "reply_language", {"detected": lang, **speak}, "ok", {}, 0)
+            yield _sse(
+                {"id": completion_id, "object": "chat.completion.custom_metadata", "choices": [], "metadata": {"tts_params": {"params": speak}}}
+            )
         yield _sse({**base, "choices": [{"index": 0, "delta": {"role": "assistant", "content": ""}, "finish_reason": None}]})
         try:
             for sentence in orchestrator.converse_stream(STATE, member_id, content.strip()):
