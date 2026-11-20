@@ -23,6 +23,7 @@ const emptyPlan = (): Plan => ({
   budget: null,
   preferences: [],
   flights: [],
+  transport: [],
   hotels: [],
   itinerary: [],
   places: [],

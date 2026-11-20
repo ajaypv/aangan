@@ -47,6 +47,7 @@ class Settings:
     ai_gateway_api_key: str
     ai_gateway_model: str
     ai_gateway_model_indic: str  # the model for Hindi, Telugu and Kannada turns: it writes those languages far better
+    ai_gateway_fallbacks: str  # comma-separated models tried, in order, when the main one is rate limited (the free tier allows 5 requests a minute per model)
     openai_reasoning: str  # optional reasoning effort for the OpenAI brain ("low", "medium", ...); empty leaves the model default
     language_mode: str  # "english": everything in English; "native": Hindi/Hinglish for members who speak it
     chat_host: str
@@ -131,6 +132,7 @@ def settings() -> Settings:
         ai_gateway_api_key=_env("AI_GATEWAY_API_KEY"),
         ai_gateway_model=_env("AI_GATEWAY_MODEL"),
         ai_gateway_model_indic=_env("AI_GATEWAY_MODEL_INDIC", "google/gemini-2.5-flash"),
+        ai_gateway_fallbacks=_env("AI_GATEWAY_FALLBACKS", "openai/gpt-4.1-mini,google/gemini-2.5-flash,openai/gpt-4.1-nano,openai/gpt-4o-mini"),
         language_mode=_language_mode(),
         chat_host=_env("AGORA_CHAT_HOST"),
         chat_app_id=_env("AGORA_CHAT_APP_ID"),

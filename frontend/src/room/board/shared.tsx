@@ -55,7 +55,9 @@ export function FlashItem({ id, as, className, children }: { id: string; as?: El
 }
 
 export const SourceChip = ({ source }: { source: PlanSource }) =>
-  source === 'live' ? (
+  source === 'estimate' ? (
+    <Pill>Estimate<span className="sr-only"> (worked out from the distance, not a timetable or a real fare)</span></Pill>
+  ) : source === 'live' ? (
     <Pill tone="success">
       <span className="size-1.5 rounded-full bg-[var(--rw-success)]" aria-hidden="true" />
       Live<span className="sr-only"> (a real search result)</span>

@@ -47,6 +47,13 @@ export function durationLabel(dep: string, arr: string): string {
   return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
 }
 
+/** "9h 30m" from a number of minutes. */
+export function minutesLabel(total: number): string {
+  const h = Math.floor(total / 60)
+  const m = Math.round(total % 60)
+  return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+}
+
 export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`
 
 export const participantById = (room: Room, id: string | null | undefined): Participant | undefined =>

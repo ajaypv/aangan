@@ -18,16 +18,19 @@ import threading
 import time
 from datetime import date as _date, datetime, timedelta
 
-from . import languages, travel_data
+from . import ground, languages, travel_data
 from .state import _zone
 
 log = logging.getLogger("aangan.rooms")
 
 LOCK = threading.RLock()
+# One value per server start. A restart restores rooms from the last save, so a version number can go BACKWARDS; an app that
+# only ever accepts newer versions would then ignore the room for good. The epoch tells it the server has started over.
+EPOCH = secrets.token_hex(4)
 ONLINE_FOR_S = 20
 MAX_MESSAGES_KEPT = 600
 HOLDS = ("proposed", "selected", "booked", "rejected")
-COST_CATEGORIES = ("flights", "stay", "food", "activities", "local", "other")
+COST_CATEGORIES = ("flights", "transport", "stay", "food", "activities", "local", "other")  # transport: train, bus or car between cities
 MEAL_TIMES = {"breakfast": "08:30", "lunch": "13:00", "dinner": "19:30", "snack": "17:00"}
 PLACE_SLOTS = ("10:00", "15:00", "17:30", "11:30", "09:00")
 DEMO_REF_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # no 0/O/1/I: a reference is read out loud
@@ -98,8 +101,8 @@ def _nice_date(iso: str) -> str:
 def empty_plan() -> dict:
     return {
         "goal": "", "destination": None, "origin": None, "dates": None, "travelers": [], "budget": None, "preferences": [],
-        "traveler_count": None, "rooms": None,
-        "flights": [], "hotels": [], "places": [], "restaurants": [], "itinerary": [], "costs": [], "decisions": [],
+        "traveler_count": None, "rooms": None, "local_mode": None,
+        "flights": [], "transport": [], "hotels": [], "places": [], "restaurants": [], "itinerary": [], "costs": [], "decisions": [],
         "open_questions": [], "checklist": [],
     }
 
@@ -194,6 +197,8 @@ def _item_cost(room: dict, kind: str, item: dict) -> int:
     n = travellers(room)
     if kind == "flight":
         return int(item["price"] * n)
+    if kind == "transport":  # a train or bus fare is per person; a car or cab is per vehicle of four
+        return int(item["price"] * (n if item["per"] == "person" else ground.cars_needed(n)))
     if kind == "hotel":
         stay = nights(room["plan"])
         return int(item["price_per_night"] * (1 if stay is None else stay) * (room["plan"].get("rooms") or 1))
@@ -215,9 +220,14 @@ def cost_summary(room: dict) -> dict:
         if day:
             by_day[day] = by_day.get(day, 0) + int(amount)
 
+    ground_chosen = [t for t in plan["transport"] if t["status"] in ("selected", "booked")]
+    for t in ground_chosen:
+        who = f"x {n}" if t["per"] == "person" else f"x {ground.cars_needed(n)} car{'s' if ground.cars_needed(n) > 1 else ''}"
+        add(f"{t['label']}, {t['from']} to {t['to']} {who}", _item_cost(room, "transport", t), "transport", True, _date_to_day(plan, t["date"]))
+
     chosen = [f for f in plan["flights"] if f["status"] in ("selected", "booked")]
     defaulted = False
-    if not chosen and plan["flights"]:
+    if not chosen and plan["flights"] and not ground_chosen:  # a chosen train or car is the way there: no flight is assumed
         proposed = [f for f in plan["flights"] if f["status"] == "proposed"]
         chosen, defaulted = ([min(proposed, key=lambda f: f["price"])] if proposed else []), True
     for f in chosen:
@@ -308,7 +318,7 @@ def _public(room: dict) -> dict:
     voice = room.get("_voice") or {}
     pending = room.get("pending_approval")
     out = {
-        "id": room["id"], "version": room["version"], "title": room["title"], "host_participant_id": room["host_participant_id"],
+        "id": room["id"], "version": room["version"], "epoch": EPOCH, "title": room["title"], "host_participant_id": room["host_participant_id"],
         "created_at": room["created_at"],
         "participants": [
             {**{k: v for k, v in p.items() if not k.startswith("_")}, "last_seen": _hhmm(p["_seen"]) if p.get("_seen") else p.get("joined_at", ""),
@@ -331,7 +341,7 @@ def snapshot(state, room_id: str, since: int | None = None) -> dict:
         room = _room(state, room_id)
         _refresh_presence(room)
         if since is not None and since == room["version"]:
-            return {"id": room["id"], "version": room["version"], "unchanged": True}
+            return {"id": room["id"], "version": room["version"], "epoch": EPOCH, "unchanged": True}
         return _public(room)
 
 
@@ -554,12 +564,13 @@ def set_goal(state, room_id: str, goal: str) -> dict:
 
 
 def _clear_destination_items(room: dict) -> None:
-    """A new destination makes the old one's flights, hotels, places and meals irrelevant (anything booked stays)."""
+    """A new destination makes the old one's flights, hotels, places and meals irrelevant, even ones that were booked: they
+    would otherwise keep counting towards the new trip's cost and block a new flight search. The Bookings list keeps the
+    record of what was booked, so nothing is lost; the group cancels those on the airline's or hotel's side."""
     plan = room["plan"]
-    for key in ("flights", "hotels", "places", "restaurants"):
-        plan[key] = [i for i in plan[key] if i["status"] == "booked"]
-    keep = {i["id"] for key in ("flights", "hotels", "places", "restaurants") for i in plan[key]}
-    plan["itinerary"] = [e for e in plan["itinerary"] if not e.get("ref") or e["ref"] in keep]
+    for key in ("flights", "transport", "hotels", "places", "restaurants"):
+        plan[key] = []
+    plan["itinerary"] = []  # hand-added visits belonged to the old place too
     plan["costs"] = [c for c in plan["costs"] if c.get("category") not in ("local",)]
     room.pop("_drafted_for", None)
 
@@ -580,11 +591,33 @@ def set_destination(state, room_id: str, name: str, lat=None, lon=None) -> dict:
         old = room["plan"]["destination"]
         if old and old["name"].lower() != dest["name"].lower():
             _clear_destination_items(room)
+            if room["plan"]["goal"] == f"Family trip to {old['name']}":
+                room["plan"]["goal"] = ""  # the automatic headline follows the destination; the group's own words stay
         room["plan"]["destination"] = dest
+        for q in room["plan"]["open_questions"]:  # "where should we go?" is answered once a place is chosen
+            if not q["resolved"] and _WHERE_QUESTION.search(q["text"]):
+                q["resolved"] = True
         if not room["plan"]["goal"]:
             room["plan"]["goal"] = f"Family trip to {dest['name']}"  # the board's headline, until the group words it better
         _bump(room)
         return {"destination": dest}
+
+
+_WHERE_QUESTION = re.compile(r"destination|where (?:to|do|should|would)|which (?:city|place|destination)|specific places|places? .{0,40}considering|explore destinations", re.I)
+
+
+def clear_destination(state, room_id: str) -> dict:
+    """The group dropped the destination (and has not picked another yet): the board forgets it and its unbooked options."""
+    with LOCK:
+        room = _room(state, room_id)
+        plan = room["plan"]
+        old = plan["destination"]
+        _clear_destination_items(room)
+        plan["destination"] = None
+        if old and old["name"].lower() in (plan["goal"] or "").lower():
+            plan["goal"] = ""
+        _bump(room)
+        return {"cleared": old["name"] if old else None}
 
 
 def set_origin(state, room_id: str, name: str, lat=None, lon=None) -> dict:
@@ -608,12 +641,50 @@ def set_dates(state, room_id: str, start: str, end: str | None = None, nights_co
         raise RoomError(400, "the end date is before the start date")
     with LOCK:
         room = _room(state, room_id)
+        before = room["plan"]["dates"]
         room["plan"]["dates"] = {"start": first.isoformat(), "end": last.isoformat()}
         for entry in room["plan"]["itinerary"]:  # the same days, on the new calendar dates
             if entry.get("day"):
                 entry["date"] = _day_to_date(room["plan"], entry["day"])
+        if before and before != room["plan"]["dates"]:
+            _fit_to_dates(room)
         _bump(room)
         return {"dates": room["plan"]["dates"], "nights": (last - first).days}
+
+
+def _fit_to_dates(room: dict) -> None:
+    """The trip now runs on different dates: flights for the old dates are dropped (booked ones stay, they are real), days
+    that no longer exist leave the itinerary, and the hotel check-out moves to the new last day. The plan is marked as
+    needing a fresh draft, which searches the missing flights and fills days that have nothing yet."""
+    plan = room["plan"]
+    dates = plan["dates"]
+    stale = {f["id"] for key in ("flights", "transport") for f in plan[key]
+             if f["status"] != "booked" and f["date"] not in (dates["start"], dates["end"])}
+    for key in ("flights", "transport"):
+        plan[key] = [f for f in plan[key] if f["id"] not in stale]
+    days = trip_days(plan) or 1
+    kept = []
+    for e in plan["itinerary"]:
+        if e.get("ref") in stale:
+            continue
+        if e.get("kind") == "stay" and str(e.get("title", "")).startswith("Check out of"):
+            if days > 1:  # the check-out belongs on the last day, wherever that is now
+                e.update(day=days, date=_day_to_date(plan, days), time=e.get("time") or "11:00")
+                kept.append(e)
+            continue
+        if e.get("day") and e["day"] > days:
+            continue
+        kept.append(e)
+    plan["itinerary"] = kept
+    plan["costs"] = [c for c in plan["costs"] if c.get("category") != "local"]  # local transport is priced per day: the draft re-adds it
+    for key in ("places", "restaurants"):
+        for item in plan[key]:
+            if item.get("day") and item["day"] > days and item["status"] != "booked":
+                item["day"] = None
+                item["status"] = "proposed"
+                if key == "restaurants":
+                    item["date"] = item["time"] = None
+    room.pop("_drafted_for", None)
 
 
 def set_budget(state, room_id: str, total, currency: str = "INR") -> dict:
@@ -663,7 +734,11 @@ def record_decision(state, room_id: str, text: str, by=None) -> dict:
     with LOCK:
         room = _room(state, room_id)
         ids, _ = _resolve_people(room, by)
-        d = {"id": _next(room, "d"), "text": _clean(text, 200), "by": ids, "ts": _hhmm()}
+        line = _clean(text, 200)
+        same = next((d for d in room["plan"]["decisions"] if d["text"].lower().rstrip(". ") == line.lower().rstrip(". ")), None)
+        if same:  # the same decision said again (people repeat themselves) is not a new decision
+            return same
+        d = {"id": _next(room, "d"), "text": line, "by": ids, "ts": _hhmm()}
         room["plan"]["decisions"].append(d)
         _bump(room)
         return d
@@ -725,6 +800,8 @@ def add_cost(state, room_id: str, label: str, amount, status: str = "estimate", 
         }
         if day:
             line["day"] = int(day)
+        if line["category"] == "local":  # there is one line for getting around the destination: a new one replaces the old
+            room["plan"]["costs"] = [c for c in room["plan"]["costs"] if c.get("category") != "local" or c["label"].lower() == line["label"].lower()]
         same = next((c for c in room["plan"]["costs"] if c["label"].lower() == line["label"].lower()), None)
         if same:
             same.update(line)
@@ -738,8 +815,9 @@ def add_cost(state, room_id: str, label: str, amount, status: str = "estimate", 
 
 
 def _find(room: dict, ref: str) -> tuple[str, dict]:
-    """(kind, item) for an id such as f-1, h-2, pl-3 or r-4. Kinds: flight, hotel, place, restaurant."""
-    table = (("pl-", "place", "places"), ("f-", "flight", "flights"), ("h-", "hotel", "hotels"), ("r-", "restaurant", "restaurants"))
+    """(kind, item) for an id such as f-1, h-2, pl-3, r-4 or t-5. Kinds: flight, hotel, place, restaurant, transport."""
+    table = (("pl-", "place", "places"), ("f-", "flight", "flights"), ("h-", "hotel", "hotels"), ("r-", "restaurant", "restaurants"),
+             ("t-", "transport", "transport"))
     for prefix, kind, key in table:
         if str(ref).startswith(prefix):
             item = next((i for i in room["plan"][key] if i["id"] == ref), None)
@@ -785,6 +863,52 @@ def add_flights(state, room_id: str, offers: list[dict]) -> list[dict]:
         if added:
             _bump(room)
         return added
+
+
+def add_transport(state, room_id: str, options: list[dict]) -> list[dict]:
+    """Add train, bus and car options for a journey. A new search for a leg and a mode replaces the options still only
+    'proposed' for it; chosen and rejected ones stay. Nothing here is ever 'booked': these are estimates."""
+    with LOCK:
+        room = _room(state, room_id)
+        plan = room["plan"]
+        searched = {(o["date"], o["mode"]) for o in options}
+        _drop_items(room, "transport", lambda t: t["status"] != "proposed" or (t["date"], t["mode"]) not in searched)
+        have = {(t["mode"], t["label"], t["from"], t["to"], t["date"]) for t in plan["transport"]}
+        added = []
+        for o in options:
+            key = (o["mode"], o["label"], o["from"], o["to"], o["date"])
+            if key in have:
+                continue
+            item = {
+                "id": _next(room, "t"), "mode": o["mode"], "label": _clean(o["label"], 60), "from": o["from"], "to": o["to"], "date": o["date"],
+                "leg": o.get("leg", "outbound"), "duration_min": int(o["duration_min"]), "distance_km": int(o["distance_km"]),
+                "price": int(o["price"]), "per": "vehicle" if o.get("per") == "vehicle" else "person", "source": "estimate",
+                "notes": _clean(o.get("notes", ""), 200), "status": "proposed",
+            }
+            plan["transport"].append(item)
+            have.add(key)
+            added.append(copy.deepcopy(item))
+        if added:
+            _bump(room)
+        return added
+
+
+def set_local_transport(state, room_id: str, mode: str) -> dict:
+    """How the group gets around at the destination: cab, public transport or their own car. Replaces the local travel cost."""
+    if mode not in ("cab", "public", "own_car"):
+        raise RoomError(400, "mode must be cab, public or own_car")
+    with LOCK:
+        room = _room(state, room_id)
+        plan = room["plan"]
+        plan["local_mode"] = mode
+        plan["costs"] = [c for c in plan["costs"] if c.get("category") != "local"]
+        days = trip_days(plan)
+        label = amount = None
+        if days:
+            label, amount = ground.local_cost(mode, days, travellers(room))
+            plan["costs"].append({"label": label, "amount": int(amount), "status": "estimate", "category": "local"})
+        _bump(room)
+        return {"local_mode": mode, "label": label, "amount": amount}
 
 
 def add_hotels(state, room_id: str, hotels: list[dict]) -> list[dict]:
@@ -858,6 +982,34 @@ def add_restaurants(state, room_id: str, restaurants: list[dict], meal: str | No
         return added
 
 
+def _deselect_rivals(room: dict, kind: str, item: dict) -> None:
+    """One hotel for the stay and one flight for each leg: choosing another puts the earlier choice back to 'proposed' and
+    takes it off the itinerary, so the board and the cost never count both."""
+    plan = room["plan"]
+    if kind == "hotel":
+        rivals = [h for h in plan["hotels"] if h is not item and h["status"] == "selected"]
+    elif kind in ("flight", "transport"):
+        # one way of making each journey: another flight or train for the same leg replaces the earlier choice. A leg is told
+        # apart by its date (a same-day trip has one date for both legs, so there only the exact same route competes).
+        same_day_trip = bool(plan.get("dates") and plan["dates"]["start"] == plan["dates"]["end"])
+        leg = (item["from"], item["to"], item["date"])
+
+        def competes(other: dict) -> bool:
+            if other is item or other["status"] != "selected":
+                return False
+            if (other["from"], other["to"], other["date"]) == leg:
+                return True
+            return not same_day_trip and other["date"] == item["date"]
+
+        rivals = [x for key in ("flights", "transport") for x in plan[key] if competes(x)]
+    else:
+        return
+    gone = {r["id"] for r in rivals}
+    for r in rivals:
+        r["status"] = "proposed"
+    plan["itinerary"] = [e for e in plan["itinerary"] if e.get("ref") not in gone]
+
+
 def choose(state, room_id: str, ref: str, reject: bool = False) -> dict:
     """Mark a flight, hotel, place or restaurant as selected (or rejected). Booking is a separate, human step."""
     with LOCK:
@@ -866,6 +1018,8 @@ def choose(state, room_id: str, ref: str, reject: bool = False) -> dict:
         if item["status"] == "booked":
             raise RoomError(409, f"{ref} is already booked")
         item["status"] = "rejected" if reject else "selected"
+        if not reject:
+            _deselect_rivals(room, kind, item)
         if reject:
             if kind in ("place", "restaurant"):
                 item["day"] = None
@@ -905,7 +1059,7 @@ def schedule_item(state, room_id: str, ref: str, day: int | None = None, time: s
         kind, item = _find(room, ref)
         if item["status"] == "rejected":
             raise RoomError(409, f"{ref} was rejected; select it first if the family changed its mind")
-        if day is None and kind == "flight":
+        if day is None and kind in ("flight", "transport"):
             day = _date_to_day(plan, item["date"])
         if day is None:
             raise RoomError(400, "day is required (1 is the first day of the trip)")
@@ -931,6 +1085,14 @@ def schedule_item(state, room_id: str, ref: str, day: int | None = None, time: s
             entry = {**base, "time": item["dep"], "title": f"{item['airline']} {item['number']}, {item['from']} to {item['to']}",
                      "place": item["from"], "lat": origin["lat"] if origin else None, "lon": origin["lon"] if origin else None,
                      "notes": f"Lands {item['arr']} at {item['to']}", "kind": "travel"}
+        elif kind == "transport":
+            origin = travel_data.city(item["from"])
+            if item["status"] == "proposed":
+                item["status"] = "selected"
+            hours, minutes = divmod(item["duration_min"], 60)
+            entry = {**base, "time": at or "08:00", "title": f"{item['label']}, {item['from']} to {item['to']}", "place": item["from"],
+                     "lat": origin["lat"] if origin else None, "lon": origin["lon"] if origin else None,
+                     "notes": f"About {hours} h {minutes:02d} min, {item['distance_km']} km. Estimate: no fixed departure time.", "kind": "travel"}
         else:  # hotel
             last = trip_days(plan)
             verb = "Check in at" if day == 1 else "Check out of" if last and day == last else "Stay at"
@@ -938,6 +1100,8 @@ def schedule_item(state, room_id: str, ref: str, day: int | None = None, time: s
                 item["status"] = "selected"
             entry = {**base, "time": at or ("14:00" if day == 1 else "11:00"), "title": f"{verb} {item['name']}", "place": item["area"],
                      "lat": item["lat"], "lon": item["lon"], "notes": "Step-free access" if item.get("step_free") else "", "kind": "stay"}
+        if kind in ("flight", "hotel", "transport") and item["status"] == "selected":
+            _deselect_rivals(room, kind, item)
         saved = _upsert_entry(room, entry, (ref, entry["title"]))
         _bump(room)
         return {"ref": ref, "kind": kind, "day": day, "time": saved["time"], "itinerary_id": saved["id"]}
@@ -1229,13 +1393,49 @@ def spawn(fn, *args, **kwargs) -> threading.Thread:
 _HOLD_PHRASES = {"One moment.", *languages.HOLD.values(), *languages.LOOKING.values()}
 
 
+def _letters(text: str) -> str:
+    return "".join(ch for ch in text.lower() if ch.isalnum())
+
+
+def _repeat_split(earlier: list[str], text: str) -> str | None:
+    """If `text` starts with the speaker's most recent earlier messages joined together (the voice engine resends their
+    unanswered words in front of the new ones), return what comes after them; None when it does not start with them."""
+    for k in range(min(len(earlier), 5), 0, -1):
+        known = _letters(" ".join(earlier[-k:]))
+        if not known or not _letters(text).startswith(known):
+            continue
+        seen = 0
+        for i, ch in enumerate(text):  # walk the original text past the same number of letters and digits
+            seen += ch.isalnum()
+            if seen == len(known):
+                return text[i + 1:].lstrip(" .,;:!?-").strip()
+    return None
+
+
+def _voice_message(state, room_id: str, participant_id: str, text: str) -> dict:
+    """Save what a speaker said as a room message. When the voice engine resends earlier words in front of new ones, only
+    the new part is saved (so the chat is not the same sentence growing longer each turn); when nothing is new, the
+    earlier message is answered again and no duplicate is added."""
+    clean = _clean(text, 2000)
+    with LOCK:
+        room = _room(state, room_id)
+        mine = [m for m in room["messages"][-12:] if m["kind"] == "user" and m["participant_id"] == participant_id]
+    rest = _repeat_split([m["text"] for m in mine], clean) if mine else None
+    if rest is None:
+        return add_user_message(state, room_id, participant_id, clean)
+    if rest:
+        return add_user_message(state, room_id, participant_id, rest)
+    with LOCK:
+        return copy.deepcopy(mine[-1])
+
+
 def converse_room_stream(state, room_id: str, participant_id: str, text: str):
     """The voice path: what was said is saved as a room message, the planner answers (and updates the plan), and the reply
     is yielded a sentence at a time, ready for the speech engine. The reply is also saved in the room as Aangan's."""
     from . import orchestrator, planner
     from .speech import speakable
 
-    message = add_user_message(state, room_id, participant_id, text)
+    message = _voice_message(state, room_id, participant_id, text)
     english = message["lang"] == "en"
     spoken: list[str] = []
     try:

@@ -299,7 +299,7 @@ def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool
 
     With `lead_in`, a model that goes straight to a tool without saying anything gets a short spoken sentence, so
     the voice is never silent while the tool runs."""
-    from .gateway import gateway_client
+    from .gateway import gateway_client, open_stream
 
     cfg = settings()
     client = client or gateway_client(cfg.ai_gateway_api_key)
@@ -326,7 +326,7 @@ def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool
 
         content = ""
         calls: dict[int, dict] = {}
-        for chunk in client.chat.completions.create(**kwargs):
+        for chunk in open_stream(client, kwargs):
             if not chunk.choices:
                 continue
             delta = chunk.choices[0].delta

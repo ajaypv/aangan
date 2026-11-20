@@ -9,6 +9,7 @@ export type SectionKey =
   | 'summary'
   | 'approval'
   | 'flights'
+  | 'transport'
   | 'hotels'
   | 'map'
   | 'itinerary'
@@ -28,12 +29,19 @@ const slices = (r: Room): Record<SectionKey, unknown> => {
     summary: [p.goal, p.destination, p.origin, p.dates, p.travelers, p.budget, p.preferences],
     approval: r.pending_approval,
     flights: p.flights,
+    transport: p.transport,
     hotels: p.hotels,
-    map: [p.destination, p.origin, p.hotels.map((h) => [h.lat, h.lon]), p.places.map((i) => [i.lat, i.lon]), p.restaurants.map((i) => [i.lat, i.lon])],
+    map: [
+      p.destination, p.origin,
+      p.hotels.map((h) => [h.lat, h.lon, h.status]),
+      p.places.map((i) => [i.lat, i.lon, i.status]),
+      p.restaurants.map((i) => [i.lat, i.lon, i.status]),
+      p.itinerary.map((i) => [i.day, i.time, i.lat, i.lon]),
+    ],
     itinerary: p.itinerary,
     places: p.places,
     restaurants: p.restaurants,
-    costs: p.costs,
+    costs: [p.costs, p.cost_summary],
     decisions: p.decisions,
     questions: p.open_questions,
     checklist: p.checklist,
@@ -46,6 +54,7 @@ const itemsOf = (r: Room): Map<string, string> => {
   const add = (id: string, v: unknown) => m.set(id, JSON.stringify(v))
   const p = r.plan
   p.flights.forEach((x) => add(x.id, x))
+  p.transport.forEach((x) => add(x.id, x))
   p.hotels.forEach((x) => add(x.id, x))
   p.itinerary.forEach((x) => add(x.id, x))
   p.places.forEach((x) => add(x.id, x))

@@ -3,7 +3,7 @@ import type { CostCategory, CostSummary, Flight, Hotel, ItineraryItem, PlaceToVi
 
 /** Addendum 1: selected (or else the cheapest proposed) flight x travellers, selected hotel x nights, selected meals and places, and the explicit cost lines. */
 export function summarise(p: Plan | null): CostSummary {
-  const by: Record<CostCategory, number> = { flights: 0, stay: 0, food: 0, activities: 0, local: 0, other: 0 }
+  const by: Record<CostCategory, number> = { flights: 0, transport: 0, stay: 0, food: 0, activities: 0, local: 0, other: 0 }
   if (!p) return { total: 0, per_person: 0, travellers: 1, currency: 'INR', by_category: by, by_day: [], budget: null, remaining: null, over_budget: false }
   const n = Math.max(1, p.travelers.length)
   const live = <T extends { status: string }>(xs: T[]) => xs.filter((x) => x.status !== 'rejected')

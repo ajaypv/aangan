@@ -19,8 +19,9 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date as _date, timedelta
 
-from . import languages, rooms, travel_data, travel_places
+from . import ground, languages, rooms, travel_data, travel_places
 from .config import settings
+from .gateway import open_stream
 
 log = logging.getLogger("aangan.planner")
 
@@ -46,13 +47,17 @@ How you work:
 - As soon as the destination, the dates and the travellers are known, call draft_plan once. It searches flights and a hotel and fills each day with places and a lunch and dinner. After that, refine the plan as people talk, with the other tools.
 - Flights and hotels come only from search_flights and search_hotels, places and restaurants only from search_places, search_restaurants or draft_plan. Never invent a flight, hotel, restaurant, price, opening time or booking reference. Results marked sample are sample data: say so if asked.
 - Prefer a non-stop flight over the cheapest connection when it costs under about 1,500 rupees more per person.
+- People may prefer to go by train, bus or car instead of flying, and to get around the destination by public transport, a cab or their own car. When the group decides how to travel, call travel_by with the mode: it chooses that train, bus or car for the way there and back and replaces the flights. To only look at or compare options call search_transport, which never changes what is chosen. Searching only shows options and never changes what is chosen: when someone asks to see or compare options, search and describe them, and call select_option only when the group has chosen one. For getting around the destination call set_local_transport and never add a local transport cost line yourself. Train, bus and car options are estimates from distance: never invent a train name, number, platform or departure time, and say they are estimates. They cannot be booked here, the group books them (IRCTC for trains).
 - Respect what the household remembers about the people going (allergies, diet, step-free access): it is listed below and is already in the preferences. Choose places and restaurants that suit it.
 - Never book. When the group wants to book, call propose_booking: the host approves with a button, so tell them the host needs to approve.
 - Never say anything is booked, confirmed or reserved. Choosing an option only SELECTS it ("I've selected", "I've put ... in the plan"). Only the host's approval books, and bookings here are demo bookings.
 - When the plan is over budget, say so plainly and offer one concrete way to bring it down (a cheaper flight time, a cheaper hotel, fewer paid activities).
 - When something essential is missing (where people start from, the dates, the budget), add one open question. Do not ask twice, and resolve a question once it is answered.
-- Dates are YYYY-MM-DD and a date without a year is the next one coming. Money is whole rupees. Always give approximate latitude and longitude for a place you add yourself.
-- When the group clearly agrees on something, record it as a decision.
+- Dates are YYYY-MM-DD and a date without a year is the next one coming. "N days" means the end date is the start date plus N minus 1 (two days from the 21st is the 21st to the 22nd); "N nights" means start plus N. When the dates change, the backend drops the flights and days that no longer fit and drafts the missing ones itself, so do not search again. Money is whole rupees. Always give approximate latitude and longitude for a place you add yourself.
+- When the group clearly agrees on something, record it as a decision. Never record a decision that is already in the plan.
+- When the group changes its mind about where to go: if they name a new city, call set_destination with it (the old destination's unbooked options are cleared for you), then draft_plan once dates and travellers are known. If they drop the destination and name no new one, call drop_destination. If they name only a region (such as North India), do not set a destination: suggest two or three cities in one short sentence and add one open question. Do not record "the trip is no longer planned" as a decision.
+- When someone asks you to suggest or choose something, make the suggestion and put it in the plan with your tools; do not ask a question back unless something essential is missing.
+- Speech is transcribed and often wrong or messy ("daily" for Delhi, filler words, half sentences). Use the context of the conversation to work out the most likely meaning, and if you truly cannot, ask one short question instead of guessing.
 - Flights, the hotel, chosen restaurants and chosen places are priced by the backend; add cost lines only for other things such as local transport, tips or shopping."""
 
 
@@ -78,12 +83,16 @@ class Turn:
         self.answered = self.answered or (answer and bool(piece.strip()))
         glue = " " if self.apart and self.reply and not self.reply[-1].isspace() and not piece[:1].isspace() else ""
         self.apart = not answer  # a hold phrase is followed by a fresh stretch of words
+        if not answer and not piece[-1:].isspace():
+            # a hold phrase ends with a space: the speech grouper releases a sentence only once whitespace follows it, so
+            # without one "One moment." would sit unspoken until the tools finished
+            piece += " "
         self.reply += glue + piece
         return glue + piece
 
 
 _ADDED = (
-    ("flights", "flight option"), ("hotels", "hotel option"), ("places", "place to visit", "places to visit"), ("restaurants", "restaurant option"),
+    ("flights", "flight option"), ("transport", "train, bus or car option"), ("hotels", "hotel option"), ("places", "place to visit", "places to visit"), ("restaurants", "restaurant option"),
     ("scheduled", "item on the itinerary", "items on the itinerary"), ("decisions", "decision"), ("questions", "open question"),
     ("checklist", "checklist item"), ("costs", "cost line"),
 )
@@ -93,7 +102,8 @@ _CLAIM = re.compile(r"\b(?P<lead>I've|I have|I|we've|we have|we|and|then)\s+(?P<
 
 
 def honest(text: str) -> str:
-    return _CLAIM.sub(lambda m: f"{m.group('lead')} {m.group('mid')}selected", text)
+    # no markdown in a spoken or one-line reply: a model sometimes bolds headings anyway
+    return _CLAIM.sub(lambda m: f"{m.group('lead')} {m.group('mid')}selected", text.replace("**", ""))
 
 
 _SET = (("destination", "the destination"), ("origin", "the starting city"), ("dates", "the dates"), ("budget", "the budget"),
@@ -191,6 +201,13 @@ def find_flights(origin: str, destination: str, date: str, passengers: int, limi
     return rank_flights([x for x in (_offer(s, "sample") for s in sample) if x])[:limit], "sample"
 
 
+def _transport_view(t: dict) -> dict:
+    keys = ("id", "mode", "label", "from", "to", "date", "distance_km", "price", "per", "source", "status")
+    hours, minutes = divmod(t["duration_min"], 60)
+    # the journey time as words, so a reply says "about 14 hours" and not "855 minutes"
+    return {**{k: t[k] for k in keys}, "journey_time": f"about {hours} hours" + (f" {minutes} minutes" if minutes else "")}
+
+
 def _flight_view(f: dict) -> dict:
     return {"id": f["id"], "airline": f["airline"], "number": f["number"], "from": f["from"], "to": f["to"], "date": f["date"], "dep": f["dep"],
             "arr": f["arr"], "price_per_person": f["price"], "stops": f["stops"], "source": f["source"], "status": f["status"]}
@@ -199,12 +216,23 @@ def _flight_view(f: dict) -> dict:
 # ---------------------------------------------------------------- the tools the model can use
 
 
+_DROPPING = re.compile(
+    r"not going|no longer|n't want|don't want|do not want|not (?:go|travel)|cancel|forget (?:it|about)|drop (?:it|the)|scrap|call (?:it|the trip) off|"
+    r"not anymore|any ?more|instead of|rather than|change (?:of )?(?:plan|mind|the destination)|somewhere else|another place|different (?:place|city|destination)",
+    re.I)
+
+
+_ONE_WAY = re.compile(r"one[- ]way|only (?:the )?(?:way (?:there|back)|outbound|return|going|coming)|fly (?:back|there|home|one)|flight (?:back|there|home)|but fly", re.I)
+_MODE_WORDS = {"train": "train", "bus": "bus", "car": "own car", "cab": "outstation cab"}
+
+
 class Tools:
     """The plan tools for one room and one turn. Each public method is one tool; its docstring is for readers, the schema
     the model sees is in TOOL_SPECS. A tool returns a small JSON-able dict, or raises, which the model reads as an error."""
 
-    def __init__(self, state, room_id: str, turn: Turn, participant_id: str | None = None):
+    def __init__(self, state, room_id: str, turn: Turn, participant_id: str | None = None, said: str | None = None):
         self.state, self.room_id, self.turn, self.participant_id = state, room_id, turn, participant_id
+        self.said = said  # the message being answered, so a destructive tool can check the group really asked for it
 
     # --- helpers
     def _plan(self) -> dict:
@@ -251,6 +279,15 @@ class Tools:
         self.turn.note("destination")
         return rooms.set_destination(self.state, self.room_id, name, lat, lon)
 
+    def drop_destination(self) -> dict:
+        # this wipes the flights, stay, places and meals, so it needs the group's own words: a model once called it when
+        # people only said they would drive instead of taking a train
+        if self.said is not None and not _DROPPING.search(self.said):
+            return {"error": "The latest message does not say the group is giving up the destination, so nothing was cleared. "
+                             "Changing how they travel, the dates or the budget never clears the destination. Do not call this tool for that."}
+        self.turn.note("destination")
+        return rooms.clear_destination(self.state, self.room_id)
+
     def set_origin(self, name: str, lat=None, lon=None) -> dict:
         self.turn.note("origin")
         return rooms.set_origin(self.state, self.room_id, name, lat, lon)
@@ -290,6 +327,8 @@ class Tools:
         return out
 
     def add_cost(self, label: str, amount, status: str = "estimate", category: str = "other", day: int | None = None) -> dict:
+        if category in ("transport", "flights"):  # these are priced from the chosen options: a line here would count the fare twice
+            return {"error": "Flights, trains, buses and cars are priced by the backend from what is chosen. Choose them (travel_by or select_option); do not add a cost line."}
         self.turn.note("costs")
         return rooms.add_cost(self.state, self.room_id, label, amount, status, category, day)
 
@@ -315,6 +354,73 @@ class Tools:
             "source": source, "passengers": n,
             "note": "These are live prices." if source == "live" else "Live search found nothing, so these are SAMPLE flights, not real prices.",
         }
+
+    def search_transport(self, mode: str | None = None, origin: str | None = None, destination: str | None = None, date: str | None = None) -> dict:
+        """Train, bus and car options between the two cities, for the journey there and (when the trip has an end date) the way back."""
+        plan = self._plan()
+        origin = origin or (plan.get("origin") or {}).get("name")
+        destination = destination or (plan.get("destination") or {}).get("name")
+        dates = plan.get("dates") or {}
+        if not (origin and destination and (date or dates)):
+            raise ValueError("need an origin, a destination and dates (set them first or pass them)")
+        legs = [(origin, destination, date, "outbound")] if date else [(origin, destination, dates["start"], "outbound")]
+        if not date and dates["end"] != dates["start"]:
+            legs.append((destination, origin, dates["end"], "return"))
+        found = [o for leg in legs for o in ground.options(leg[0], leg[1], leg[2], leg[3], mode)]
+        if not found:
+            return {"options": [], "note": f"I cannot estimate ground travel between {origin} and {destination}: they are the same place, too close to need a ticket, or not a city I know."}
+        added = rooms.add_transport(self.state, self.room_id, found)
+        self.turn.note("transport", len(added))
+        wanted = {(o["date"], o["mode"]) for o in found}
+        listed = [t for t in self._plan()["transport"] if (t["date"], t["mode"]) in wanted]
+        picks = {}
+        for leg_date in {t["date"] for t in listed}:
+            best = ground.recommended([t for t in listed if t["date"] == leg_date], mode)
+            picks[leg_date] = best["id"] if best else None
+        return {
+            "options": [_transport_view(t) for t in listed], "recommended_by_date": picks,
+            "note": "These are ESTIMATES from the distance between the cities, not timetables: no train names, numbers or departure times. "
+                    "This search has NOT chosen anything: call select_option only for the one the group picks, which replaces the flight "
+                    "(or the earlier choice) for that journey. The group books it themselves (IRCTC for trains).",
+        }
+
+    def travel_by(self, mode: str, label: str | None = None) -> dict:
+        """The group has decided how to get between the cities: choose that train, bus or car for the way there AND the way back
+        in one step (replacing any flights or earlier choice), and remember it as their preference."""
+        if mode not in ground.MODES:
+            raise ValueError("mode must be train, bus, car or cab (to fly, use search_flights and select_option)")
+        plan = self._plan()
+        origin, destination, dates = (plan.get("origin") or {}).get("name"), (plan.get("destination") or {}).get("name"), plan.get("dates")
+        if not (origin and destination and dates):
+            raise ValueError("set the starting city, the destination and the dates first")
+        legs = [(origin, destination, dates["start"], "outbound")]
+        if dates["end"] != dates["start"]:
+            legs.append((destination, origin, dates["end"], "return"))
+        chosen = []
+        for leg_from, leg_to, leg_date, leg in legs:
+            found = ground.options(leg_from, leg_to, leg_date, leg, mode)
+            if not found:
+                return {"error": f"I cannot estimate {mode} travel between {leg_from} and {leg_to}: they are too close, or not cities I know."}
+            rooms.add_transport(self.state, self.room_id, found)
+            self.turn.note("transport", len(found))
+            wanted = next((o for o in found if label and o["label"].lower() == label.lower()), None) or ground.recommended(found, mode)
+            saved = next((t for t in self._plan()["transport"] if (t["mode"], t["label"], t["date"]) == (wanted["mode"], wanted["label"], wanted["date"])), None)
+            if saved:
+                rooms.choose(self.state, self.room_id, saved["id"])
+                try:
+                    rooms.schedule_item(self.state, self.room_id, saved["id"])
+                    self.turn.note("scheduled")
+                except rooms.RoomError:
+                    pass
+                chosen.append(_transport_view(next(t for t in self._plan()["transport"] if t["id"] == saved["id"])))
+        if not ground.preferred_mode(plan["preferences"]) or ground.preferred_mode(plan["preferences"]) != mode:
+            rooms.add_preference(self.state, self.room_id, f"Travel between cities by {_MODE_WORDS[mode]}.")
+        return {"chosen": chosen, "note": "Chosen for both journeys. These are ESTIMATES from distance, not timetables; the group books them themselves."}
+
+    def set_local_transport(self, mode: str) -> dict:
+        """How the group gets around at the destination: cab, public (metro, buses, autos) or own_car."""
+        self.turn.note("costs")
+        return rooms.set_local_transport(self.state, self.room_id, mode)
 
     def _room_dict(self) -> dict:
         """The room's own plan as a lightweight dict for counting travellers (no copy of the messages)."""
@@ -381,7 +487,46 @@ class Tools:
         return out
 
     def select_option(self, ref: str, reject: bool = False) -> dict:
-        return rooms.choose(self.state, self.room_id, ref, reject)
+        out = rooms.choose(self.state, self.room_id, ref, reject)
+        if not reject and out["kind"] in ("flight", "transport"):
+            try:  # the way there and back belongs on the itinerary on its day, not only in the options list
+                rooms.schedule_item(self.state, self.room_id, ref)
+                self.turn.note("scheduled")
+            except rooms.RoomError:
+                pass  # a date outside the trip: it stays selected, there is just no day to show it on
+        if not reject and out["kind"] == "transport":
+            self._same_way_back(ref)
+        return out
+
+    def _same_way_back(self, ref: str) -> None:
+        """A round trip goes by the same means both ways: choosing the train, bus or car for one journey chooses it for the other,
+        unless the group said only one way (or to fly the other). It replaces whatever was chosen for that journey."""
+        if self.said and _ONE_WAY.search(self.said):
+            return
+        plan = self._plan()
+        item = next((t for t in plan["transport"] if t["id"] == ref), None)
+        dates = plan.get("dates")
+        if not item or not dates or dates["start"] == dates["end"]:
+            return
+        other_date = dates["end"] if item["date"] == dates["start"] else dates["start"] if item["date"] == dates["end"] else None
+        if other_date is None:
+            return
+        if any(t["date"] == other_date and t["status"] in ("selected", "booked") and t["mode"] == item["mode"] for t in plan["transport"]):
+            return  # that journey already goes this way
+        pick = next((t for t in plan["transport"] if (t["mode"], t["label"], t["date"]) == (item["mode"], item["label"], other_date)), None)
+        if pick is None:
+            made = [o for o in ground.options(item["to"], item["from"], other_date, "return" if other_date == dates["end"] else "outbound", item["mode"])
+                    if o["label"] == item["label"]]
+            rooms.add_transport(self.state, self.room_id, made)
+            self.turn.note("transport", len(made))
+            pick = next((t for t in self._plan()["transport"] if (t["mode"], t["label"], t["date"]) == (item["mode"], item["label"], other_date)), None)
+        if pick:
+            rooms.choose(self.state, self.room_id, pick["id"])
+            try:
+                rooms.schedule_item(self.state, self.room_id, pick["id"])
+                self.turn.note("scheduled")
+            except rooms.RoomError:
+                pass
 
     def schedule_item(self, ref: str, day: int | None = None, time: str | None = None) -> dict:
         out = rooms.schedule_item(self.state, self.room_id, ref, day, time)
@@ -400,7 +545,23 @@ class Tools:
         return {**out, "note": "Nothing is booked. The host must approve with the Approve button."}
 
     def draft_plan(self) -> dict:
+        self._note_travel_wishes()
         return _draft(self.state, self.room_id, self.turn)
+
+    def _note_travel_wishes(self) -> None:
+        """"We prefer the train" said in the same breath as the plan must shape the first draft, whatever order the model works in:
+        note it as a preference before drafting (the draft reads the preferences)."""
+        if not self.said:
+            return
+        known = self._plan()["preferences"]
+        mode = ground.preferred_mode([self.said])
+        if mode and not ground.preferred_mode(known):
+            rooms.add_preference(self.state, self.room_id, f"Travel between cities by {_MODE_WORDS[mode]}.")
+            self.turn.note("preferences")
+        if ground.local_mode([self.said]) != "cab" and ground.local_mode(known) == "cab":
+            rooms.add_preference(self.state, self.room_id,
+                                 "Get around the destination in our own car." if ground.local_mode([self.said]) == "own_car" else "Use public transport at the destination.")
+            self.turn.note("preferences")
 
 
 def _spec(name: str, description: str, props: dict | None = None, required: list[str] | None = None) -> dict:
@@ -415,12 +576,19 @@ TOOL_SPECS = [
     _spec("set_goal", "Set the one-line goal of the plan.", {"goal": _S}, ["goal"]),
     _spec("set_destination", "Set where the group is going. lat and lon may be left out for well-known Indian cities.",
           {"name": _S, "lat": _N, "lon": _N}, ["name"]),
+    _spec("drop_destination", "ONLY when the group says in plain words that they no longer want to go to the current destination and have not named another: clears it and ALL its flights, hotels, places and meals from the board. Never for a change of transport, dates, budget or people."),
     _spec("set_origin", "Set the city the group starts from.", {"name": _S, "lat": _N, "lon": _N}, ["name"]),
     _spec("set_dates", "Set the trip dates (YYYY-MM-DD). Give end, or the number of nights.", {"start": _S, "end": _S, "nights": _I}, ["start"]),
     _spec("set_budget", "Set the total budget in whole rupees.", {"total": _N, "currency": _S}, ["total"]),
     _spec("set_travelers", "Set who is travelling (participant ids or names), the head count if it is more than the people in the room, and the number of hotel rooms.",
           {"participant_ids": _PEOPLE, "count": _I, "hotel_rooms": _I}),
     _spec("add_preference", "Note a preference or need of the group (diet, access, a wish).", {"text": _S}, ["text"]),
+    _spec("search_transport", "Find train, bus or car options for the journey there and back (estimates from the distance between the cities, not timetables). Results are added to the plan; choose one with select_option, which replaces the flight for that journey. mode is train, bus, car (self-drive) or cab; leave it out to get all.",
+          {"mode": {"type": "string", "enum": ["train", "bus", "car", "cab"]}, "origin": _S, "destination": _S, "date": _S}),
+    _spec("travel_by", "The group has DECIDED to go by train, bus, car (their own, self-drive) or cab: chooses it for the way there and the way back in one step, replacing any flight, and remembers the preference. label is optional (for a train 3AC, 2AC or Sleeper class). To fly instead, use search_flights and select_option.",
+          {"mode": {"type": "string", "enum": ["train", "bus", "car", "cab"]}, "label": _S}, ["mode"]),
+    _spec("set_local_transport", "Set how the group gets around at the destination: cab, public (metro, buses and autos) or own_car. Replaces the local travel cost.",
+          {"mode": {"type": "string", "enum": ["cab", "public", "own_car"]}}, ["mode"]),
     _spec("search_flights", "Search flights. Live results when available, otherwise sample data (the result says which). Results are added to the plan. Origin, destination and date default to the plan's.",
           {"origin": _S, "destination": _S, "date": _S, "passengers": _I}),
     _spec("search_hotels", "Search sample hotels for a city; results are added to the plan. budget is the most per night.",
@@ -440,7 +608,7 @@ TOOL_SPECS = [
           {"title": _S, "day": _I, "date": _S, "time": _S, "place": _S, "lat": _N, "lon": _N, "notes": _S}, ["title"]),
     _spec("add_cost", "Add a cost line for something the backend does not price itself (local transport, tips, shopping).",
           {"label": _S, "amount": _N, "status": {"type": "string", "enum": ["estimate", "quoted", "booked"]},
-           "category": {"type": "string", "enum": list(rooms.COST_CATEGORIES)}, "day": _I}, ["label", "amount"]),
+           "category": {"type": "string", "enum": [c for c in rooms.COST_CATEGORIES if c not in ("flights", "transport")]}, "day": _I}, ["label", "amount"]),
     _spec("record_decision", "Record something the group agreed on.", {"text": _S, "by": _PEOPLE}, ["text"]),
     _spec("add_open_question", "Add a question the group still has to answer.", {"text": _S}, ["text"]),
     _spec("resolve_question", "Mark an open question answered, by id or by matching text.", {"question_id": _S, "text": _S}),
@@ -522,10 +690,27 @@ def _draft(state, room_id: str, turn: Turn) -> dict:
 
     # flights: outbound and return, searched together, the recommended one of each leg chosen
     origin = (plan.get("origin") or {}).get("name")
-    if origin and not plan["flights"]:
-        legs = [(origin, dest, plan["dates"]["start"])]
-        if plan["dates"]["end"] != plan["dates"]["start"]:
-            legs.append((dest, origin, plan["dates"]["end"]))
+    legs = [(origin, dest, plan["dates"]["start"])]
+    if plan["dates"]["end"] != plan["dates"]["start"]:
+        legs.append((dest, origin, plan["dates"]["end"]))
+    have_dates = {f["date"] for f in plan["flights"]} | {t["date"] for t in plan["transport"] if t["status"] in ("selected", "booked")}
+    legs = [leg for leg in legs if leg[2] not in have_dates]  # a leg is searched only when the plan has no flight or chosen train on its date yet
+    by_ground = ground.preferred_mode(plan["preferences"])  # "we'll take the train": the draft travels that way instead of flying
+    if origin and legs and by_ground:
+        for leg_origin, leg_dest, leg_date in legs:
+            options = ground.options(leg_origin, leg_dest, leg_date, "outbound" if leg_date == plan["dates"]["start"] else "return", by_ground)
+            if not options:
+                continue  # too close or unknown: the flight search below is not tried either, there is nothing sensible to offer
+            rooms.add_transport(state, room_id, options)
+            turn.note("transport", len(options))
+            best = ground.recommended(options, by_ground)
+            saved = next((t for t in rooms.plan_snapshot(state, room_id)["plan"]["transport"]
+                          if (t["label"], t["date"], t["mode"]) == (best["label"], best["date"], best["mode"])), None)
+            if saved:
+                rooms.schedule_item(state, room_id, saved["id"])
+                made["flights"] += 1
+        legs = []
+    if origin and legs:
         with ThreadPoolExecutor(max_workers=len(legs)) as pool:
             found = list(pool.map(lambda leg: find_flights(leg[0], leg[1], leg[2], n), legs))
         for offers, _source in found:
@@ -565,7 +750,8 @@ def _draft(state, room_id: str, turn: Turn) -> dict:
 
     # places: nearby places grouped into days, step-free first when someone needs it
     snap_places = rooms.plan_snapshot(state, room_id)["plan"]["places"]
-    if not any(p.get("day") for p in snap_places):
+    busy_days = {p["day"] for p in snap_places if p.get("day")}  # days that already have something are left as they are
+    if len(busy_days) < days:
         pool = travel_places.sample_places(dest, step_free_first=bool(needs["step_free"]), limit=30)
         added = rooms.add_places(state, room_id, pool, notes_for=tools._place_notes(needs))
         turn.note("places", len(added))
@@ -574,6 +760,8 @@ def _draft(state, room_id: str, turn: Turn) -> dict:
         left = [dict(p, ref=listed[p["name"]]["id"]) for p in pool if p["name"] in listed and listed[p["name"]]["status"] == "proposed"
                 and not (place_cap and p["price"] * n > place_cap) and (p["step_free"] or not needs["step_free"])]
         for day, count in enumerate(_fit(_day_counts(days), len(left)), start=1):
+            if day in busy_days:
+                continue
             anchor = None
             for _ in range(count):
                 if not left:
@@ -591,41 +779,44 @@ def _draft(state, room_id: str, turn: Turn) -> dict:
     chosen = [f for f in plan_now["flights"] if f["status"] == "selected"]
     arrives = max((f["arr"] for f in chosen if f["date"] == plan["dates"]["start"] and f["to"] != (plan.get("origin") or {}).get("code", "")), default="00:00")
     leaves = min((f["dep"] for f in chosen if f["date"] == plan["dates"]["end"] and f["date"] != plan["dates"]["start"]), default="23:59")
-    if not any(r.get("day") for r in plan_now["restaurants"]):
-        used: set[tuple[str, str]] = set()  # (restaurant, meal): one plan item per restaurant and meal, so never twice
-        for day in range(1, days + 1):
-            same_day = [p for p in plan_now["places"] if p.get("day") == day]
-            centre = {"lat": sum(p["lat"] for p in same_day) / len(same_day), "lon": sum(p["lon"] for p in same_day) / len(same_day)} if same_day else None
-            for meal in ("lunch", "dinner"):
-                if meal == "dinner" and day == days and days > 1:
-                    continue  # the day of going home: no dinner
-                if meal == "lunch" and ((day == 1 and arrives > "12:30") or (day == days and days > 1 and leaves < "14:00")):
-                    continue  # still in the air (or already on the way to the airport) at lunch time
-                options = [r for r in travel_places.sample_restaurants(dest, meal, budget_for_two=food_cap_for_two, veg_only=bool(needs["veg"]), limit=12)
+    planned_meals = {(r["day"], r["meal"]) for r in plan_now["restaurants"] if r.get("day")}  # a meal already on a day stays
+    used: set[tuple[str, str]] = {(r["name"], r["meal"]) for r in plan_now["restaurants"] if r.get("day")}  # one plan item per restaurant and meal
+    for day in range(1, days + 1):
+        same_day = [p for p in plan_now["places"] if p.get("day") == day]
+        centre = {"lat": sum(p["lat"] for p in same_day) / len(same_day), "lon": sum(p["lon"] for p in same_day) / len(same_day)} if same_day else None
+        for meal in ("lunch", "dinner"):
+            if (day, meal) in planned_meals:
+                continue
+            if meal == "dinner" and day == days and days > 1:
+                continue  # the day of going home: no dinner
+            if meal == "lunch" and ((day == 1 and arrives > "12:30") or (day == days and days > 1 and leaves < "14:00")):
+                continue  # still in the air (or already on the way to the airport) at lunch time
+            options = [r for r in travel_places.sample_restaurants(dest, meal, budget_for_two=food_cap_for_two, veg_only=bool(needs["veg"]), limit=12)
+                       if (r["name"], meal) not in used]
+            if not options:  # nothing cheap enough is left: the budget cap gives way to having a meal
+                options = [r for r in travel_places.sample_restaurants(dest, meal, veg_only=bool(needs["veg"]), limit=12)
                            if (r["name"], meal) not in used]
-                if not options:  # nothing cheap enough is left: the budget cap gives way to having a meal
-                    options = [r for r in travel_places.sample_restaurants(dest, meal, veg_only=bool(needs["veg"]), limit=12)
-                               if (r["name"], meal) not in used]
-                if not options:
-                    continue
-                names = {name for name, _ in used}
-                fresh = [r for r in options if r["name"] not in names] or options  # a new place before a repeat for the other meal
-                if needs["veg"] and any(r["veg_only"] for r in fresh):
-                    fresh = [r for r in fresh if r["veg_only"]]
-                pick = _nearest(fresh, centre)
-                used.add((pick["name"], meal))
-                added = rooms.add_restaurants(state, room_id, [pick], meal=meal, notes_for=tools._food_notes(needs), replace=False)
-                turn.note("restaurants", len(added))
-                saved = next((r for r in rooms.plan_snapshot(state, room_id)["plan"]["restaurants"]
-                              if r["name"] == pick["name"] and r["meal"] == meal), None)
-                if saved:
-                    rooms.schedule_item(state, room_id, saved["id"], day)
-                    made["meals"] += 1
-                    turn.note("scheduled")
+            if not options:
+                continue
+            names = {name for name, _ in used}
+            fresh = [r for r in options if r["name"] not in names] or options  # a new place before a repeat for the other meal
+            if needs["veg"] and any(r["veg_only"] for r in fresh):
+                fresh = [r for r in fresh if r["veg_only"]]
+            pick = _nearest(fresh, centre)
+            used.add((pick["name"], meal))
+            added = rooms.add_restaurants(state, room_id, [pick], meal=meal, notes_for=tools._food_notes(needs), replace=False)
+            turn.note("restaurants", len(added))
+            saved = next((r for r in rooms.plan_snapshot(state, room_id)["plan"]["restaurants"]
+                          if r["name"] == pick["name"] and r["meal"] == meal), None)
+            if saved:
+                rooms.schedule_item(state, room_id, saved["id"], day)
+                made["meals"] += 1
+                turn.note("scheduled")
 
     # local transport, and a few things to do before leaving
     if not any(c.get("category") == "local" for c in plan_now["costs"]):
-        rooms.add_cost(state, room_id, "Local transport (cabs and autos)", (900 if n <= 4 else 1600) * days, "estimate", "local")
+        local_label, local_amount = ground.local_cost(plan_now.get("local_mode") or ground.local_mode(plan_now["preferences"]), days, n)
+        rooms.add_cost(state, room_id, local_label, local_amount, "estimate", "local")
         turn.note("costs")
     for text in ["Carry a photo ID for every traveller"] + (["Confirm step-free access at the hotel and at each place"] if needs["step_free"] else []):
         out = rooms.add_checklist_item(state, room_id, text)
@@ -707,6 +898,8 @@ def _plan_view(plan: dict) -> dict:
         "dates": plan["dates"], "travelers": plan["travelers"], "traveler_count": plan.get("traveler_count"), "hotel_rooms": plan.get("rooms"),
         "budget": plan["budget"], "preferences": plan["preferences"],
         "flights": pick(plan["flights"], ("id", "airline", "number", "from", "to", "date", "dep", "price", "stops", "source", "status")),
+        "ground_transport": pick(plan["transport"], ("id", "mode", "label", "from", "to", "date", "duration_min", "price", "per", "status")),
+        "local_transport": plan.get("local_mode"),
         "hotels": pick(plan["hotels"], ("id", "name", "area", "price_per_night", "rating", "source", "status")),
         "places": pick(plan["places"], ("id", "name", "category", "price", "day", "status")),
         "restaurants": pick(plan["restaurants"], ("id", "name", "meal", "price_for_two", "day", "status")),
@@ -752,7 +945,7 @@ def _reply_rule(addressed: bool, lang: str, spoken: bool) -> str:
 def _stream_round(client, kwargs: dict):
     """One streamed model round: yields ("text", piece) as it arrives, then ("end", content, [calls]) with the tool calls assembled."""
     content, calls = "", {}
-    for chunk in client.chat.completions.create(**kwargs):
+    for chunk in open_stream(client, kwargs):
         if not chunk.choices:
             continue
         delta = chunk.choices[0].delta
@@ -793,7 +986,7 @@ def _model_turn(state, room_id: str, participant_id: str, message: dict, address
         {"role": "user", "content": _context(state, room_id, participant_id, message, addressed)},
     ]
     tools = [{"type": "function", "function": spec} for spec in TOOL_SPECS]
-    handlers = Tools(state, room_id, turn, participant_id)
+    handlers = Tools(state, room_id, turn, participant_id, said=message["text"])
     led = False
     for round_no in range(MAX_ROUNDS):
         if round_no:
@@ -946,6 +1139,42 @@ def _rule_turn(state, room_id: str, message: dict, addressed: bool, turn: Turn) 
 # ---------------------------------------------------------------- entry points
 
 
+_DECIDING = re.compile(r"\b(let'?s|lets|we'?ll|we will|we want|we would like|we should|take|go by|going by|travel by|switch|back to|instead|prefer|rather|drive|driving|use)\b", re.I)
+_BROWSING = re.compile(r"\b(show|compare|options?|what about|how much|price|prices|cost|costs|is there|are there|which|list|check|find|tell me|what are)\b", re.I)
+_MODE_WORDS_IN_SPEECH = (
+    ("train", re.compile(r"\b(train|trains|rail|railway)\b", re.I)),
+    ("bus", re.compile(r"\b(bus|buses)\b", re.I)),
+    ("car", re.compile(r"\b(drive|driving|own car|our car|by car|the car|road ?trip)\b", re.I)),
+)
+_FLYING = re.compile(r"\b(fly|flying|flight|flights|plane|air)\b", re.I)
+
+
+def decided_travel_mode(said: str) -> str | None:
+    """The way of getting between cities the group has clearly DECIDED on in this message (train, bus or car), else None.
+    Looking at options ("show me the bus options") and mentions of flying are not decisions."""
+    if not said or _BROWSING.search(said) or _FLYING.search(said) or not _DECIDING.search(said):
+        return None
+    modes = [mode for mode, pattern in _MODE_WORDS_IN_SPEECH if pattern.search(said)]
+    return modes[0] if len(modes) == 1 else None
+
+
+def _enforce_travel_choice(state, room_id: str, said: str) -> None:
+    """A safety net behind the model: when the group clearly decided how to travel and the plan does not say so afterwards (a
+    model sometimes tells the room it switched without calling the tool), apply the decision now."""
+    mode = decided_travel_mode(said)
+    if not mode:
+        return
+    plan = rooms.plan_snapshot(state, room_id)["plan"]
+    if not (plan.get("origin") and plan.get("destination") and plan.get("dates")):
+        return
+    dates = {plan["dates"]["start"], plan["dates"]["end"]}
+    chosen = [t for t in plan["transport"] if t["status"] in ("selected", "booked")]
+    if chosen and all(t["mode"] == mode for t in chosen) and {t["date"] for t in chosen} >= dates:
+        return  # already travelling that way, both ways
+    result = run_tool(Tools(state, room_id, Turn(), said=said), "travel_by", {"mode": mode})
+    log.info("travel mode %s applied by the safety net in room %s: %s", mode, room_id, "error" in result and result["error"] or "ok")
+
+
 def _stream_brain(state, room_id: str, participant_id: str, message: dict, addressed: bool, spoken: bool, turn: Turn, client=None):
     if not settings().ai_gateway_api_key and client is None:
         if rooms.once(state, room_id, "no_ai"):
@@ -955,6 +1184,10 @@ def _stream_brain(state, room_id: str, participant_id: str, message: dict, addre
             yield turn.reply
         return
     yield from _model_turn(state, room_id, participant_id, message, addressed, spoken, turn, client)
+    try:
+        _enforce_travel_choice(state, room_id, message["text"])
+    except Exception:
+        log.exception("could not apply the travel choice in room %s", room_id)
 
 
 def stream_turn(state, room_id: str, participant_id: str, message_id: int, spoken: bool = True, client=None):

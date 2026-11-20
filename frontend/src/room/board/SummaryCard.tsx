@@ -16,8 +16,8 @@ export function SummaryCard({ room }: { room: Room }) {
       {empty ? (
         <EmptyLine>Say where you want to go and Aangan will start the plan.</EmptyLine>
       ) : (
-        <div className="space-y-4 px-4 pb-4 pt-2">
-          <div>
+        <div className="room-summary-layout space-y-4 px-4 pb-4 pt-2">
+          <div className="room-summary-goal">
             <p className="text-xl font-bold leading-snug">{p.goal || room.title}</p>
             <ul className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-2" aria-label="Where and when">
               {(p.origin || p.destination) && (
@@ -42,7 +42,7 @@ export function SummaryCard({ room }: { room: Room }) {
           <CostStrip room={room} />
 
           {travellers.length > 0 && (
-            <div>
+            <div className="room-summary-travellers">
               <p className="t-caption mb-1.5 font-semibold uppercase tracking-wide">Travelling</p>
               <ul className="flex flex-wrap gap-2" aria-label="Travellers">
                 {travellers.map((t) => (
@@ -56,7 +56,7 @@ export function SummaryCard({ room }: { room: Room }) {
           )}
 
           {p.preferences.length > 0 && (
-            <ul className="flex flex-wrap gap-1.5" aria-label="Preferences">
+            <ul className="room-summary-needs flex flex-wrap gap-1.5" aria-label="Preferences">
               {p.preferences.map((x) => (
                 <li key={x}>
                   <Pill tone="info">{x}</Pill>

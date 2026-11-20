@@ -111,7 +111,7 @@ def test_cost_summary_adds_up_what_is_chosen_and_explicit_lines():
     rooms.add_cost(STATE, rid, "Local transport", 5000, category="local", day=3)
     rooms.add_cost(STATE, rid, "Souvenirs", 2000, category="nonsense")
     s = plan_of(rid)["cost_summary"]
-    assert s["by_category"] == {"flights": 16800, "stay": 26000, "food": 1800, "activities": 400, "local": 5000, "other": 2000}
+    assert s["by_category"] == {"flights": 16800, "transport": 0, "stay": 26000, "food": 1800, "activities": 400, "local": 5000, "other": 2000}
     assert s["total"] == 52000 and s["travellers"] == 4 and s["per_person"] == 13000 and s["currency"] == "INR"
     assert s["budget"] == 80000 and s["remaining"] == 28000 and s["over_budget"] is False
     days = {d["day"]: d for d in s["by_day"]}
@@ -239,7 +239,7 @@ def test_own_itinerary_items_and_cost_lines():
     assert next(e for e in plan_of(rid)["itinerary"] if e["title"] == "Sunset at Chapora")["date"] == "2027-01-04"
 
 
-def test_changing_the_destination_drops_the_old_one_but_keeps_bookings():
+def test_changing_the_destination_drops_the_old_one_but_the_bookings_record_stays():
     rid = make_room()
     tools, _ = tools_for(rid)
     set_trip(tools, travellers=2)
@@ -249,7 +249,8 @@ def test_changing_the_destination_drops_the_old_one_but_keeps_bookings():
     run(tools, "search_places", city="Goa")
     run(tools, "set_destination", name="Manali")
     plan = plan_of(rid)
-    assert plan["destination"]["name"] == "Manali" and plan["places"] == [] and [f["status"] for f in plan["flights"]] == ["booked"]
+    assert plan["destination"]["name"] == "Manali" and plan["places"] == [] and plan["flights"] == []
+    assert len(rooms.snapshot(STATE, rid)["bookings"]) == 1
     assert rooms.drafted_for(STATE, rid) is None
 
 

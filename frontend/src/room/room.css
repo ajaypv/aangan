@@ -59,34 +59,263 @@
   }
 }
 
-/* Map pins are plain divs (no image files to bundle). */
+/* Local SVG pictograms keep markers and their legend consistent. */
 .room-pin {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
+  margin: 4px;
   border-radius: 9999px;
   border: 2px solid #fff;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
   color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1;
+  transition: transform 140ms ease-out;
 }
-.room-pin--dot {
-  width: 16px;
-  height: 16px;
+.room-pin svg { width: 21px; height: 21px; }
+.room-pin--hotel { border-radius: 10px; }
+.room-map-marker:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+.room-map-marker:hover .room-pin,
+.room-map-marker:focus-visible .room-pin { transform: scale(1.1); }
+.room-map-legend-icon { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; color: #fff; }
+.room-map-legend-icon svg { width: 16px; height: 16px; }
+.room-map-dialog {
+  display: flex;
+  flex-direction: column;
+  width: calc(100vw - 32px);
+  max-width: none;
+  height: calc(100dvh - 32px);
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.room-map-dialog .room-map-legend { margin-top: 0; }
+@media (max-width: 639px) {
+  .room-map-dialog { width: 100vw; height: 100dvh; max-width: none; border-radius: 0; padding: 12px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .room-pin { transition: none; }
+  .room-map-dialog { animation: none; transition: none; }
 }
 .room-map .leaflet-container {
   font-family: var(--rw-font);
   background: rgb(var(--rw-neutral-30));
 }
 .room-map .leaflet-control-attribution {
-  font-size: 10px;
+  font-size: 11px;
+}
+.room-map .leaflet-control-attribution a { color: #005f87; }  /* 4.5:1 or better on the pale credit bar */
+
+.room-chat-toggle,
+.room-budget-toggle,
+.room-day-picker {
+  display: none;
+}
+.room-chat-rest {
+  flex: 1;
+  padding: 24px 20px;
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.room-plan-update {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  color: var(--brand-text);
+  font-size: 12px;
+}
+.room-plan-canvas,
+.room-options-grid {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+.room-plan-options > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  list-style: none;
+}
+.room-plan-options > summary::-webkit-details-marker { display: none; }
+.room-plan-options > summary:focus-visible,
+.room-chat-toggle:focus-visible,
+.room-budget-toggle:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.room-plan-options[open] .room-details-chevron { transform: rotate(180deg); }
+.room-options-grid { padding-top: 16px; }
+.room-updated-badge,
+.room-unread {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-text);
+  font-size: 11px;
+  font-weight: 700;
+}
+.room-map-surface { height: 288px; }
+.room-route-key {
+  display: inline-block;
+  width: 20px;
+  height: 3px;
+  margin: 0 5px 3px 0;
+  border-radius: 2px;
+  background: #3a8a6e;
+}
+.room-route-draw {
+  stroke-dasharray: 1;
+  animation: room-route-draw 1.2s ease-out both;
+}
+.room-itinerary-item.room-flash-row .room-itinerary-connector {
+  background: var(--brand);
+  transform-origin: top;
+  animation: room-connect 900ms ease-out both;
+}
+.room-itinerary-item.room-flash-row .room-itinerary-node {
+  animation: room-node 600ms ease-out both;
+}
+@keyframes room-route-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes room-connect {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes room-node {
+  from { transform: scale(0.85); }
+  to { transform: scale(1); }
+}
+
+@media (min-width: 1024px) {
+  .room-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .room-workspace[data-chat-open='true'] {
+    grid-template-columns: minmax(0, 1fr) clamp(360px, 30vw, 440px);
+  }
+  .room-plan-panel { container: room-board / inline-size; }
+  .room-discussion { overflow-y: auto; }
+  .room-discussion-questions { max-height: 190px; overflow-y: auto; padding: 0 12px 10px; }
+  .room-chat-toggle {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 10px 16px;
+    border-block: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+  }
+  .room-chat-toggle:hover { background: var(--surface-2); }
+  .room-summary-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
+    gap: 10px 16px;
+  }
+  .room-summary-layout > * { margin: 0; }
+  .room-summary-goal { grid-column: 1; }
+  .room-summary-travellers { grid-column: 2; grid-row: 1; }
+  .room-summary-travellers li { gap: 4px; padding-right: 8px; font-size: 12px; }
+  .room-summary-needs { grid-column: 1 / -1; grid-row: 2; }
+  .room-summary-layout .room-budget { grid-column: 1 / -1; grid-row: 3; }
+  .room-budget { padding: 10px 12px; }
+  .room-budget-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+  .room-budget-totals { gap: 16px; }
+  .room-budget-totals .text-2xl { font-size: 20px; }
+  .room-budget-totals .t-caption { font-size: 11px; }
+  .room-budget-totals > div:last-child > p:last-child { display: none; }
+  .room-budget-meter { flex: 1; min-width: 190px; margin-top: 0; }
+  .room-budget-meter [role='progressbar'] { height: 5px; margin-top: 5px; }
+  .room-budget-meter .t-secondary,
+  .room-budget-meter .text-sm { font-size: 12px; }
+  .room-budget-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 36px;
+    color: var(--brand-text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .room-budget-note { margin-top: 6px; }
+  .room-budget-note .t-caption { font-size: 11px; }
+  .room-map-surface { height: min(480px, 55dvh); }
+  .room-options-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .room-day-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .room-day-picker button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 32px;
+    padding: 5px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .room-day-picker button[aria-pressed='true'] {
+    border-color: var(--brand);
+    background: var(--brand-soft);
+    color: var(--brand-text);
+  }
+  .room-day-picker button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .room-day-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--brand); }
+}
+@container room-board (min-width: 680px) {
+  .room-plan-canvas { grid-template-columns: minmax(0, 1.1fr) minmax(250px, 0.9fr); }
+  .room-map-column { position: sticky; top: 16px; }
+}
+@media (min-width: 1024px) and (max-height: 800px) {
+  .room-chat-rest { display: none; }
+}
+@container room-board (min-width: 800px) {
+  .room-approval-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 24px; align-items: start; }
+  .room-approval-body > * { margin: 0; }
+  .room-approval-details { grid-column: 1; grid-row: 1 / 4; }
+  .room-approval-demo { grid-column: 2; grid-row: 1; }
+  .room-approval-actions { grid-column: 2; grid-row: 2; }
+  .room-approval-body #approval-why { grid-column: 2; grid-row: 3; }
+  .room-approval-error { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .room-route-draw,
+  .room-itinerary-item.room-flash-row .room-itinerary-connector,
+  .room-itinerary-item.room-flash-row .room-itinerary-node { animation: none; }
+  .room-budget [role='progressbar'] > div { transition: none; }
 }
 
 /* Bigger zoom buttons for fingers. */
 @media (pointer: coarse), (max-width: 1023px) {
+  .room-map .leaflet-touch .leaflet-bar a,  /* Leaflet's own touch rule is more specific and kept them at 30px */
   .room-map .leaflet-bar a {
     width: 44px;
     height: 44px;

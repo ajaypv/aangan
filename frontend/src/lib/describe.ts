@@ -117,6 +117,8 @@ const COULD_NOT: Record<string, string> = {
   cancel_event: 'cancel the event',
   send_digest: 'send the digest',
   search_flights: 'search for flights',
+  search_transport: 'look at trains, buses and cars',
+  set_local_transport: 'set how you get around',
   book_flight: 'book the flight',
   rebook_flight: 'rebook the flight',
   update_cab_pickup: 'move the cab',

@@ -2,28 +2,20 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useRef } from 'react'
 import type { Plan } from '@/types'
+import { PIN, type MapPinKind } from './mapPins'
+import { itineraryRoutes } from './mapRoutes'
 
 /*
  * The map itself (Leaflet with OpenStreetMap tiles). Loaded lazily by MapCard so Leaflet stays out of the main bundle.
- * Pins are plain divs, so there are no marker image files to bundle. Shapes as well as colours tell the kinds apart:
- * destination = big blue circle, origin = grey dot, hotels = purple squares, places = green circles, meals = orange diamonds.
+ * Pins use local SVG pictograms shared with the legend, so categories do not rely on colour alone.
  */
 export interface MapPoint {
   key: string
-  kind: 'origin' | 'destination' | 'hotel' | 'place' | 'food' | 'stop'
+  kind: MapPinKind
   name: string
   detail: string
   lat: number
   lon: number
-}
-
-export const PIN: Record<MapPoint['kind'], { color: string; label: string }> = {
-  destination: { color: '#227e9e', label: 'Destination' },
-  origin: { color: '#6f6964', label: 'Starting point' },
-  hotel: { color: '#8a4f9e', label: 'Stay' },
-  place: { color: '#3a8a3e', label: 'Place to visit' },
-  food: { color: '#c46a12', label: 'Where to eat' },
-  stop: { color: '#312d2a', label: 'Itinerary stop' },
 }
 
 /** Every point worth a pin, without two pins on the same spot (a meal on the itinerary is the same pin as the restaurant). */
@@ -43,26 +35,30 @@ export function mapPoints(plan: Plan): MapPoint[] {
   for (const h of plan.hotels.filter((x) => x.status !== 'rejected')) add({ key: h.id, kind: 'hotel', name: h.name, detail: `Stay, ${h.area}`, lat: h.lat, lon: h.lon })
   for (const x of plan.places.filter((p) => p.status !== 'rejected')) add({ key: x.id, kind: 'place', name: x.name, detail: x.area, lat: x.lat, lon: x.lon })
   for (const r of plan.restaurants.filter((x) => x.status !== 'rejected')) add({ key: r.id, kind: 'food', name: r.name, detail: `${r.cuisine}, ${r.area}`, lat: r.lat, lon: r.lon })
-  for (const i of plan.itinerary) add({ key: i.id, kind: 'stop', name: i.title, detail: i.place, lat: i.lat, lon: i.lon })
+  for (const i of plan.itinerary) {
+    const kind = i.kind === 'travel' ? 'travel' : i.kind === 'stay' ? 'hotel' : i.kind === 'food' ? 'food' : i.kind === 'place' ? 'place' : 'stop'
+    add({ key: i.id, kind, name: i.title, detail: i.place, lat: i.lat, lon: i.lon })
+  }
   return out
 }
 
 function icon(kind: MapPoint['kind']) {
-  const { color } = PIN[kind]
-  const size = kind === 'destination' ? 30 : kind === 'origin' || kind === 'stop' ? 14 : 22
-  const shape = kind === 'hotel' ? 'border-radius:6px' : kind === 'food' ? 'border-radius:4px;transform:rotate(45deg)' : 'border-radius:9999px'
+  const { color, path } = PIN[kind]
   return L.divIcon({
-    className: '',
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-    html: `<div class="room-pin" style="width:${size}px;height:${size}px;background:${color};${shape}"></div>`,
+    className: 'room-map-marker',
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
+    popupAnchor: [0, -18],
+    html: `<div class="room-pin room-pin--${kind}" style="background:${color}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg></div>`,
   })
 }
 
-export default function MapView({ plan, className }: { plan: Plan; className?: string }) {
+export default function MapView({ plan, className, day = null, expanded = false }: { plan: Plan; className?: string; day?: number | null; expanded?: boolean }) {
   const host = useRef<HTMLDivElement>(null)
   const map = useRef<L.Map | null>(null)
   const layer = useRef<L.LayerGroup | null>(null)
+  const routes = useRef(new Map<number, { signature: string; line: L.Polyline }>())
+  const rendered = useRef(false)
   const fitted = useRef('')
   const pending = useRef<L.LatLngBounds | null>(null)
 
@@ -72,8 +68,8 @@ export default function MapView({ plan, className }: { plan: Plan; className?: s
     const touch = window.matchMedia('(pointer: coarse)').matches
     const m = L.map(el, {
       zoomControl: true,
-      scrollWheelZoom: false, // the wheel scrolls the page; the +/- buttons and pinch zoom the map
-      dragging: !touch, // one finger scrolls the page on a phone; two fingers pan with a pinch
+      scrollWheelZoom: expanded,
+      dragging: expanded || !touch, // The embedded map lets one finger scroll the page; the expanded map lets it pan.
       attributionControl: true,
     }).setView([15.3, 74.1], 8)
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -96,13 +92,17 @@ export default function MapView({ plan, className }: { plan: Plan; className?: s
     return () => {
       ro.disconnect()
       m.remove()
+      routes.current.clear()
+      rendered.current = false
+      fitted.current = ''
+      pending.current = null
       map.current = null
       layer.current = null
     }
-  }, [])
+  }, [expanded])
 
   const points = mapPoints(plan)
-  const sig = points.map((p) => `${p.key}:${p.lat}:${p.lon}`).join('|')
+  const sig = JSON.stringify([points, itineraryRoutes(plan.itinerary), day])
 
   useEffect(() => {
     const m = map.current
@@ -111,9 +111,11 @@ export default function MapView({ plan, className }: { plan: Plan; className?: s
     g.clearLayers()
     const pts = mapPoints(plan)
     for (const p of pts) {
-      L.marker([p.lat, p.lon], { icon: icon(p.kind), title: p.name, alt: `${PIN[p.kind].label}: ${p.name}`, keyboard: true, riseOnHover: true })
+      const marker = L.marker([p.lat, p.lon], { icon: icon(p.kind), title: p.name, keyboard: true, riseOnHover: true })
+        .bindTooltip(escapeHtml(p.name), { direction: 'top', offset: [0, -18] })
         .bindPopup(`<strong>${escapeHtml(p.name)}</strong><br>${escapeHtml(p.detail)}`)
         .addTo(g)
+      marker.getElement()?.setAttribute('aria-label', `${PIN[p.kind].label}: ${p.name}`)
     }
     if (plan.origin && plan.destination) {
       L.polyline(
@@ -124,8 +126,31 @@ export default function MapView({ plan, className }: { plan: Plan; className?: s
         { color: PIN.destination.color, weight: 3, opacity: 0.8, dashArray: '8 8' },
       ).addTo(g)
     }
-    if (pts.length > 0 && fitted.current !== sig) {
-      fitted.current = sig
+    const nextRoutes = itineraryRoutes(plan.itinerary).filter((route) => day === null || route.day === day)
+    for (const [day, route] of routes.current) {
+      if (!nextRoutes.some((next) => next.day === day)) {
+        route.line.remove()
+        routes.current.delete(day)
+      }
+    }
+    for (const route of nextRoutes) {
+      const signature = JSON.stringify(route.points)
+      const previous = routes.current.get(route.day)
+      if (previous?.signature === signature) continue
+      previous?.line.remove()
+      const line = L.polyline(route.points, {
+        color: '#3a8a6e',
+        weight: 3,
+        opacity: 0.85,
+        className: `room-itinerary-route${rendered.current ? ' room-route-draw' : ''}`,
+      }).bindTooltip(`Day ${route.day}: planned stop order (not driving directions)`).addTo(m)
+      line.getElement()?.setAttribute('pathLength', '1')
+      routes.current.set(route.day, { signature, line })
+    }
+    rendered.current = true
+    const boundsKey = pts.map((p) => `${p.key}:${p.lat}:${p.lon}`).join('|')
+    if (pts.length > 0 && fitted.current !== boundsKey) {
+      fitted.current = boundsKey
       // Once there are places on the ground, frame those (the dashed route still shows toward the starting point); before that, frame the whole route.
       const local = pts.filter((p) => p.kind !== 'origin')
       const framed = local.length > 1 ? local : pts
@@ -136,8 +161,8 @@ export default function MapView({ plan, className }: { plan: Plan; className?: s
         m.fitBounds(bounds, { padding: [28, 28], maxZoom: 12 })
       } else pending.current = bounds
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `sig` stands for the points
-  }, [sig])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `sig` stands for pin content and ordered routes.
+  }, [sig, expanded])
 
   return <div ref={host} className={className} role="region" aria-label="Trip map" />
 }

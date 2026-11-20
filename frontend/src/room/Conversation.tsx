@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import type { Participant, Room, RoomMessage } from '@/types'
 import { Avatar, Button } from '@/ui/primitives'
 import { avatarOf } from './format'
+import { PandaAvatar } from './PandaCompanion'
 import type { PendingMessage } from './useRoom'
 
 /* Text is shown exactly as given. `lang` lets the browser pick the right script (Telugu, Kannada, Hindi) for each message. */
@@ -34,8 +35,8 @@ function UserBubble({ m, mine, room }: { m: RoomMessage | PendingMessage; mine: 
 function AgentCard({ m }: { m: RoomMessage }) {
   return (
     <li className="flex gap-2" data-kind="agent">
-      <span className="mt-5 grid size-7 shrink-0 place-items-center rounded-full bg-brand text-brand-ink" aria-hidden="true">
-        <Sparkles className="size-4" />
+      <span className="mt-5 shrink-0">
+        <PandaAvatar />
       </span>
       <div className="min-w-0 max-w-[92%]">
         <p className="t-caption mb-0.5 px-1">
@@ -71,6 +72,7 @@ export function Conversation({
   onDismiss,
   agentBusy,
   agentError,
+  historyOpen = true,
 }: {
   room: Room
   me: Participant | undefined
@@ -80,6 +82,7 @@ export function Conversation({
   onDismiss: () => void
   agentBusy: boolean
   agentError: string | null
+  historyOpen?: boolean
 }) {
   const [text, setText] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -92,13 +95,13 @@ export function Conversation({
   const last = messages[messages.length - 1]
   useEffect(() => {
     const el = scroller.current
-    if (!el) return
+    if (!el || !historyOpen) return
     const mine = last && last.participant_id === me?.id && last.kind === 'user'
     if (stick.current || mine) {
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       el.scrollTo({ top: el.scrollHeight, behavior: reduce ? 'auto' : 'smooth' })
     }
-  }, [messages.length, last, me?.id])
+  }, [messages.length, last, me?.id, historyOpen])
 
   useEffect(() => {
     const el = area.current
@@ -133,12 +136,13 @@ export function Conversation({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div
+        id="room-conversation-history"
         ref={scroller}
         onScroll={(e) => {
           const el = e.currentTarget
           stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120
         }}
-        className="min-h-0 flex-1 overflow-y-auto px-3 py-3"
+        className={cn('min-h-0 flex-1 overflow-y-auto px-3 py-3', !historyOpen && 'hidden')}
         tabIndex={0}
         role="log"
         aria-label="Conversation"
@@ -155,8 +159,15 @@ export function Conversation({
         )}
       </div>
 
+      {!historyOpen && (
+        <div className="room-chat-rest">
+          <p className="font-semibold text-ink">More trip. Less transcript.</p>
+          <p>Talk together, watch the plan take shape, or send a quick idea below.</p>
+        </div>
+      )}
+
       <form
-        className="border-t border-line bg-bg px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] pt-2.5"
+        className="mt-auto shrink-0 border-t border-line bg-bg px-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] pt-2.5"
         onSubmit={(e) => {
           e.preventDefault()
           void send(false)
@@ -202,7 +213,7 @@ export function Conversation({
             </Button>
           ) : (
             <Button size="sm" loading={agentBusy} icon={<Mic className="size-4" aria-hidden="true" />} onClick={onSummon} className="flex-1">
-              Summon Aangan (voice)
+              Talk to Aangan
             </Button>
           )}
         </div>

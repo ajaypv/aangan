@@ -163,7 +163,7 @@ def test_unknown_room_participant_and_bad_bodies():
 def test_version_goes_up_and_since_returns_unchanged():
     room = new_room()
     rid, v0 = room["id"], room["version"]
-    assert get(rid, since=v0) == {"id": rid, "version": v0, "unchanged": True}
+    assert get(rid, since=v0) == {"id": rid, "version": v0, "epoch": rooms.EPOCH, "unchanged": True}
     joined = join(rid, guest_name="Meera")["room"]
     assert joined["version"] > v0
     assert get(rid, since=v0)["version"] == joined["version"] and "plan" in get(rid, since=v0)
@@ -585,7 +585,7 @@ def test_voice_says_a_hold_phrase_while_the_first_tool_runs(model):
     rid = new_room()["id"]
     msg = rooms.add_user_message(STATE, rid, "p-1", "goal Goa")
     pieces = list(planner.stream_turn(STATE, rid, "p-1", msg["id"]))
-    assert pieces[0] == "One moment." and "".join(pieces) == "One moment. Done."
+    assert pieces[0] == "One moment. " and "".join(pieces) == "One moment. Done."
 
 
 # ---- no AI key: the plain rules ----

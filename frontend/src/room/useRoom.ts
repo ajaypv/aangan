@@ -24,11 +24,15 @@ export function useRoom(roomId: string, participantId: string, initial: Room) {
   const [reconnecting, setReconnecting] = useState(false)
   const [optimistic, setOptimistic] = useState<PendingMessage[]>([])
   const version = useRef(initial.version)
+  const epoch = useRef(initial.epoch)
   const seq = useRef(-1)
 
-  /** Only ever move forward: a slow older response must not undo a newer one. */
+  /** Only ever move forward within one server run: a slow older response must not undo a newer one. A server that has
+   * restarted (a new epoch) may have restored an older version of the room, and what it says is the truth. */
   const accept = useCallback((next: Room) => {
-    if (next.version < version.current) return
+    const restarted = Boolean(next.epoch && epoch.current && next.epoch !== epoch.current)
+    if (next.version < version.current && !restarted) return
+    epoch.current = next.epoch ?? epoch.current
     version.current = next.version
     setRoom(normalizeRoom(next))
   }, [])
@@ -46,6 +50,11 @@ export function useRoom(roomId: string, participantId: string, initial: Room) {
           const res = await api.room.get(roomId, version.current)
           if (stopped) return
           if (!isUnchanged(res)) accept(res)
+          else if (res.epoch && epoch.current && res.epoch !== epoch.current) {
+            // the server restarted and happens to be at the same version number: what we show may be from before. Fetch it fresh.
+            const fresh = await api.room.get(roomId)
+            if (!stopped && !isUnchanged(fresh)) accept(fresh)
+          } else if (res.epoch && !epoch.current) epoch.current = res.epoch
           fails = 0
           setReconnecting(false)
         } catch {

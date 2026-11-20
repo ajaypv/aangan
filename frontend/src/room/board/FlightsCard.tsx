@@ -69,7 +69,7 @@ function FlightRow({ f, travellers, currency }: { f: Flight; travellers: number;
 
 export function FlightsCard({ room }: { room: Room }) {
   const flights = room.plan.flights
-  const travellers = Math.max(1, room.plan.travelers.length)
+  const travellers = Math.max(1, room.plan.cost_summary?.travellers ?? room.plan.travelers.length)  // the head count the prices use
   const currency = room.plan.budget?.currency ?? 'INR'
   return (
     <BoardCard id="flights" section="flights" title="Flights" icon={<Plane className="size-4" />} count={flights.length}>

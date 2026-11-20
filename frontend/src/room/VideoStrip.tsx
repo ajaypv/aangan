@@ -1,7 +1,6 @@
 import type { ICameraVideoTrack, IRemoteVideoTrack } from 'agora-rtc-sdk-ng'
-import { Mic, MicOff, Sparkles, Video, VideoOff, Volume2 } from 'lucide-react'
+import { Mic, MicOff, Video, VideoOff, Volume2 } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import { Orb } from '@/components/ask/Orb'
 import { cn } from '@/lib/utils'
 import type { Participant, Room } from '@/types'
 import { Avatar, Button, IconButton } from '@/ui/primitives'
@@ -58,14 +57,65 @@ function Tile({
 }
 
 /**
- * The people in the room, as tiles: you first, then everyone else who is here, then Aangan (the voice orb) once summoned. Everyone's
+ * The people in the room, as tiles: you first, then everyone else who is here. Aangan has its own companion card. Everyone's
  * microphone and camera are OFF until they tap. A name comes from the participant list by the person's rtc_uid.
  */
-export function VideoStrip({ room, me, rtc, agentUid, agentLive }: { room: Room; me: Participant | undefined; rtc: Rtc; agentUid: string; agentLive: boolean }) {
+/** Is anyone's camera on (yours or a remote one)? Without cameras the call needs no tiles, just the two buttons. */
+export function anyCameraOn(rtc: Rtc): boolean {
+  return Boolean(rtc.localVideo) || rtc.remote.some((r) => r.hasVideo && r.video)
+}
+
+/** Your microphone and camera switches. */
+export function CallControls({ rtc, className }: { rtc: Rtc; className?: string }) {
+  return (
+    <div className={cn('flex shrink-0 gap-1.5', className)} role="group" aria-label="Your microphone and camera">
+      <IconButton
+        label={rtc.micOn ? 'Turn off microphone' : 'Turn on microphone'}
+        variant={rtc.micOn ? 'primary' : 'secondary'}
+        aria-pressed={rtc.micOn}
+        onClick={() => void rtc.toggleMic()}
+      >
+        {rtc.micOn ? <Mic className="size-5" aria-hidden="true" /> : <MicOff className="size-5" aria-hidden="true" />}
+      </IconButton>
+      <IconButton
+        label={rtc.camOn ? 'Turn off camera' : 'Turn on camera'}
+        variant={rtc.camOn ? 'primary' : 'secondary'}
+        aria-pressed={rtc.camOn}
+        onClick={() => void rtc.toggleCam()}
+      >
+        {rtc.camOn ? <Video className="size-5" aria-hidden="true" /> : <VideoOff className="size-5" aria-hidden="true" />}
+      </IconButton>
+    </div>
+  )
+}
+
+/** Audio-blocked and connection notices, shown wherever the call controls are. */
+function CallNotices({ rtc }: { rtc: Rtc }) {
+  if (!rtc.audioBlocked && !rtc.problem) return null
+  return (
+    <div className="space-y-2 px-3 py-2">
+      {rtc.audioBlocked && (
+        <Button size="sm" variant="secondary" icon={<Volume2 className="size-4" aria-hidden="true" />} onClick={rtc.resumeAudio}>
+          Tap to hear everyone
+        </Button>
+      )}
+      {rtc.problem && (
+        <p role="status" className="t-secondary text-[var(--rw-text-warning)]">
+          {rtc.problem}
+        </p>
+      )}
+    </div>
+  )
+}
+
+export function VideoStrip({ room, me, rtc }: { room: Room; me: Participant | undefined; rtc: Rtc }) {
   const others = room.participants.filter((p) => p.id !== me?.id && p.online)
   const remoteBy = new Map(rtc.remote.map((r) => [r.uid, r]))
   const speaking = new Set(rtc.speaking)
-  const agent = remoteBy.get(agentUid)
+
+  // No camera on: no tiles (the header already shows who is here) and the buttons live in Aangan's bar. That is the usual case,
+  // and it gives the plan and the conversation about 110px more room on a phone.
+  if (!anyCameraOn(rtc)) return <CallNotices rtc={rtc} />
 
   return (
     <div className="border-b border-line bg-bg px-3 py-2.5" aria-label="Video and voice">
@@ -84,45 +134,10 @@ export function VideoStrip({ room, me, rtc, agentUid, agentLive }: { room: Room;
               </Tile>
             )
           })}
-          {agentLive && (
-            <Tile name="Aangan" speaking={speaking.has(agentUid)} micOn={agent ? true : null}>
-              <Orb state={speaking.has(agentUid) ? 'speaking' : agent ? 'listening' : 'connecting'} size={56}>
-                <Sparkles className="size-4" />
-              </Orb>
-            </Tile>
-          )}
         </ul>
-        <div className="flex shrink-0 flex-col gap-1.5 sm:flex-row" role="group" aria-label="Your microphone and camera">
-          <IconButton
-            label={rtc.micOn ? 'Turn off microphone' : 'Turn on microphone'}
-            variant={rtc.micOn ? 'primary' : 'secondary'}
-            aria-pressed={rtc.micOn}
-            onClick={() => void rtc.toggleMic()}
-          >
-            {rtc.micOn ? <Mic className="size-5" aria-hidden="true" /> : <MicOff className="size-5" aria-hidden="true" />}
-          </IconButton>
-          <IconButton
-            label={rtc.camOn ? 'Turn off camera' : 'Turn on camera'}
-            variant={rtc.camOn ? 'primary' : 'secondary'}
-            aria-pressed={rtc.camOn}
-            onClick={() => void rtc.toggleCam()}
-          >
-            {rtc.camOn ? <Video className="size-5" aria-hidden="true" /> : <VideoOff className="size-5" aria-hidden="true" />}
-          </IconButton>
-        </div>
+        <CallControls rtc={rtc} className="flex-col sm:flex-row lg:flex-col" />
       </div>
-      {rtc.audioBlocked && (
-        <div className="mt-2">
-          <Button size="sm" variant="secondary" icon={<Volume2 className="size-4" aria-hidden="true" />} onClick={rtc.resumeAudio}>
-            Tap to hear everyone
-          </Button>
-        </div>
-      )}
-      {rtc.problem && (
-        <p role="status" className="t-secondary mt-2 text-[var(--rw-text-warning)]">
-          {rtc.problem}
-        </p>
-      )}
+      <CallNotices rtc={rtc} />
     </div>
   )
 }

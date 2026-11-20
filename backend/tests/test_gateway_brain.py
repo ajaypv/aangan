@@ -449,3 +449,56 @@ def test_a_running_demo_refreshes_to_the_real_time_on_every_turn(monkeypatch):
     s.now["time"] = "07:30"
     s.refresh_clock()
     assert s.now["time"] == "07:30"
+
+
+# ---- a rate-limited model moves on to the next one at once (the free tier: 5 requests a minute per model) ----
+
+
+def _limited(retry_after="40"):
+    import httpx
+    import openai
+
+    request = httpx.Request("POST", "https://ai-gateway.vercel.sh/v1/chat/completions")
+    response = httpx.Response(429, request=request, headers={"retry-after": retry_after})
+    return openai.RateLimitError("rate limited", response=response, body=None)
+
+
+class _Models:
+    """A fake client where some models are rate limited. Records which models were asked."""
+
+    def __init__(self, limited):
+        self.limited, self.asked = set(limited), []
+        self.chat = type("C", (), {"completions": self})()
+
+    def create(self, **kwargs):
+        self.asked.append(kwargs["model"])
+        if kwargs["model"] in self.limited:
+            raise _limited()
+        return iter(["stream"])
+
+
+def test_a_rate_limited_model_falls_back_without_waiting(monkeypatch):
+    from app import gateway
+
+    gateway._COOLING.clear()
+    client = _Models({"openai/gpt-4o-mini"})
+    stream = gateway.open_stream(client, {"model": "openai/gpt-4o-mini", "messages": []})
+    assert list(stream) == ["stream"]
+    assert client.asked[0] == "openai/gpt-4o-mini" and len(client.asked) == 2 and client.asked[1] != "openai/gpt-4o-mini"
+    # the limited model is benched, so the next request does not waste a call on it
+    again = _Models({"openai/gpt-4o-mini"})
+    gateway.open_stream(again, {"model": "openai/gpt-4o-mini", "messages": []})
+    assert again.asked == [client.asked[1]]
+    gateway._COOLING.clear()
+
+
+def test_when_every_model_is_limited_the_error_surfaces():
+    import openai
+    import pytest as _pytest
+    from app import gateway
+
+    gateway._COOLING.clear()
+    everyone = _Models(set(gateway.model_chain("openai/gpt-4o-mini")))
+    with _pytest.raises(openai.RateLimitError):
+        gateway.open_stream(everyone, {"model": "openai/gpt-4o-mini", "messages": []})
+    gateway._COOLING.clear()

@@ -1,11 +1,11 @@
 import type { CostCategory, CostSummary, Plan, Room } from '@/types'
 
-const CATEGORIES: CostCategory[] = ['flights', 'stay', 'food', 'activities', 'local', 'other']
+const CATEGORIES: CostCategory[] = ['flights', 'transport', 'stay', 'food', 'activities', 'local', 'other']
 
 /** What the summary would be from the cost lines alone, for a server that does not send `plan.cost_summary` (yet). */
 function fallbackSummary(plan: Plan): CostSummary {
   const travellers = Math.max(1, plan.travelers.length)
-  const by: Record<CostCategory, number> = { flights: 0, stay: 0, food: 0, activities: 0, local: 0, other: 0 }
+  const by: Record<CostCategory, number> = { flights: 0, transport: 0, stay: 0, food: 0, activities: 0, local: 0, other: 0 }
   for (const c of plan.costs) {
     const cat = CATEGORIES.includes(c.category as CostCategory) ? (c.category as CostCategory) : 'other'
     by[cat] += c.amount
@@ -44,6 +44,8 @@ export function normalizeRoom<T extends Room>(room: T): T {
     budget: p.budget ?? null,
     preferences: p.preferences ?? [],
     flights: p.flights ?? [],
+    transport: p.transport ?? [],
+    local_mode: p.local_mode ?? null,
     hotels: p.hotels ?? [],
     itinerary: p.itinerary ?? [],
     places: p.places ?? [],

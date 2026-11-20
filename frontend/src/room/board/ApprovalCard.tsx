@@ -48,18 +48,18 @@ export function ApprovalCard({ room, me, onDecide }: { room: Room; me: Participa
         </h3>
         <Pill tone="warning">Needs {a.needs === 'host' ? 'the host' : 'one of you'}</Pill>
       </div>
-      <div className="space-y-3 px-4 pb-4 pt-2">
-        <div>
+      <div className="room-approval-body space-y-3 px-4 pb-4 pt-2">
+        <div className="room-approval-details">
           <p className="font-semibold">{a.title}</p>
           <p className="num mt-1 text-3xl font-extrabold leading-none">{money(a.amount, currency)}</p>
           {included.length > 0 && <p className="t-secondary mt-1.5">Includes {included.join(', ')}</p>}
           <p className="t-secondary mt-1.5">{a.summary}</p>
         </div>
-        <p className="inline-flex items-start gap-1.5 rounded-md bg-surface px-2.5 py-1.5 text-sm font-medium">
+        <p className="room-approval-demo inline-flex items-start gap-1.5 rounded-md bg-surface px-2.5 py-1.5 text-sm font-medium">
           <Info className="mt-0.5 size-4 shrink-0 text-info" aria-hidden="true" />
           Demo booking: no real money moves.
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="room-approval-actions flex flex-wrap gap-2">
           <Button
             icon={<Check className="size-4" aria-hidden="true" />}
             disabled={!allowed || alreadyApproved || busy !== null}
@@ -88,7 +88,7 @@ export function ApprovalCard({ room, me, onDecide }: { room: Room; me: Participa
           </p>
         )}
         {error && (
-          <p role="alert" className="text-sm font-medium text-[var(--rw-text-danger)]">
+          <p role="alert" className="room-approval-error text-sm font-medium text-[var(--rw-text-danger)]">
             {error}
           </p>
         )}

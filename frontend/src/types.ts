@@ -240,7 +240,8 @@ export interface Place {
 }
 
 export type PlanItemStatus = 'proposed' | 'selected' | 'booked' | 'rejected'
-export type PlanSource = 'live' | 'sample'
+/** `estimate`: worked out from the distance between cities (train, bus and car), not a listing or a real offer. */
+export type PlanSource = 'live' | 'sample' | 'estimate'
 
 export interface Flight {
   id: string
@@ -256,6 +257,27 @@ export interface Flight {
   stops: number
   source: PlanSource
   link: string | null
+  status: PlanItemStatus
+}
+
+export type TransportMode = 'train' | 'bus' | 'car' | 'cab'
+
+/** A way of getting between cities other than flying. Always an estimate; `per` is `person` for a train or bus and `vehicle` for a car or cab. */
+export interface TransportOption {
+  id: string
+  mode: TransportMode
+  /** "3AC", "AC sleeper bus", "Self-drive car"... */
+  label: string
+  from: string
+  to: string
+  date: string
+  leg: 'outbound' | 'return' | string
+  duration_min: number
+  distance_km: number
+  price: number
+  per: 'person' | 'vehicle'
+  source: PlanSource
+  notes: string
   status: PlanItemStatus
 }
 
@@ -288,7 +310,7 @@ export interface ItineraryItem {
   cost?: number | null
 }
 
-export type CostCategory = 'flights' | 'stay' | 'food' | 'activities' | 'local' | 'other'
+export type CostCategory = 'flights' | 'transport' | 'stay' | 'food' | 'activities' | 'local' | 'other'
 
 export interface Cost {
   label: string
@@ -381,6 +403,10 @@ export interface Plan {
   budget: { total: number; currency: string } | null
   preferences: string[]
   flights: Flight[]
+  /** Train, bus and car options (estimates). Choosing one replaces the flight for that journey. */
+  transport: TransportOption[]
+  /** How the group gets around the destination: cab (the default), public transport or their own car. */
+  local_mode?: 'cab' | 'public' | 'own_car' | null
   hotels: Hotel[]
   itinerary: ItineraryItem[]
   places: PlaceToVisit[]
@@ -417,6 +443,8 @@ export interface Booking {
 export interface Room {
   id: string
   version: number
+  /** Changes every time the server starts: a restart can restore an older version, so the app must not treat it as "old news". */
+  epoch?: string
   title: string
   host_participant_id: string
   created_at: string
@@ -432,6 +460,7 @@ export interface Room {
 export interface RoomUnchanged {
   id: string
   version: number
+  epoch?: string
   unchanged: true
 }
 

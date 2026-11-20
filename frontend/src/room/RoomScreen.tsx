@@ -1,4 +1,4 @@
-import { CloudOff, Users, WifiOff } from 'lucide-react'
+import { ChevronDown, ChevronUp, CloudOff, MessageSquare, Users, WifiOff } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { api, ApiError } from '@/api'
 import { useMediaQuery } from '@/lib/useMediaQuery'
@@ -8,13 +8,15 @@ import { useMe } from '@/state/me'
 import type { Participant, Room } from '@/types'
 import { Banner, Button, EmptyState, Field, inputClass, ScreenSkeleton } from '@/ui/primitives'
 import { Conversation } from './Conversation'
+import { QuestionsCard } from './board/ListCards'
+import { PandaCompanion } from './PandaCompanion'
 import { PlanBoard } from './PlanBoard'
 import { RoomHeader } from './RoomHeader'
 import { leaveRoomRoute, loadIdentity, saveIdentity } from './roomRoute'
 import { BoardFlashProvider } from './useBoardFlash'
 import { useRoom } from './useRoom'
 import { useRoomRtc } from './useRoomRtc'
-import { VideoStrip } from './VideoStrip'
+import { anyCameraOn, CallControls, VideoStrip } from './VideoStrip'
 import './room.css'
 
 type Entry =
@@ -179,6 +181,8 @@ function RoomView({ roomId, initial, participant, onBack, onLeave }: { roomId: s
   const rtc = useRoomRtc(roomId, participant.id)
   const wide = useMediaQuery('(min-width: 1024px)')
   const [tab, setTab] = useState<PanelTab>('plan')
+  // On a wide screen the conversation is open from the start: the column beside the plan would otherwise sit empty behind a button.
+  const [chatExpanded, setChatExpanded] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches)
   const [seenId, setSeenId] = useState(() => Math.max(0, ...initial.messages.map((m) => m.id)))
   const [planDot, setPlanDot] = useState(false)
   const [agentBusy, setAgentBusy] = useState(false)
@@ -187,7 +191,7 @@ function RoomView({ roomId, initial, participant, onBack, onLeave }: { roomId: s
   const micRef = useRef(rtc)
   micRef.current = rtc
 
-  const chatVisible = wide || tab === 'chat'
+  const chatVisible = wide ? chatExpanded : tab === 'chat'
   const lastId = Math.max(0, ...room.messages.map((m) => m.id))
   useEffect(() => {
     if (chatVisible) setSeenId(lastId)
@@ -238,73 +242,97 @@ function RoomView({ roomId, initial, participant, onBack, onLeave }: { roomId: s
         </Banner>
       )}
 
-      <main id="main" className="flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[62fr_38fr] lg:grid-rows-[minmax(0,1fr)]">
-        {/* The plan: its own scroll. On phones it is one of two tabs. */}
-        <section
-          id="room-plan-panel"
-          role={wide ? undefined : 'tabpanel'}
-          aria-label="Plan"
-          aria-labelledby={wide ? undefined : 'room-tab-plan'}
-          className={cn('order-3 min-h-0 flex-1 overflow-y-auto overscroll-contain', tab === 'plan' ? 'block' : 'hidden', 'lg:order-none lg:block')}
-        >
-          <BoardFlashProvider room={room} onPlanChanged={() => setPlanDot(true)}>
-            <PlanBoard room={room} me={me} onDecide={approve} />
-          </BoardFlashProvider>
-        </section>
-
-        {/* The discussion: video strip on top, then the conversation. `contents` lets the phone order these with the tabs. */}
-        <div className="contents lg:flex lg:min-h-0 lg:flex-col lg:border-l lg:border-line">
-          <div className="order-1 lg:order-none">
-            <VideoStrip room={room} me={me} rtc={rtc} agentUid={agentUidNow} agentLive={room.agent.live} />
-          </div>
-
-          <div role="tablist" aria-label="Plan or chat" className="order-2 grid grid-cols-2 border-b border-line bg-surface lg:hidden">
-            {(['plan', 'chat'] as const).map((t) => {
-              const on = tab === t
-              return (
-                <button
-                  key={t}
-                  id={`room-tab-${t}`}
-                  type="button"
-                  role="tab"
-                  aria-selected={on}
-                  aria-controls={t === 'plan' ? 'room-plan-panel' : 'room-chat-panel'}
-                  onClick={() => setTab(t)}
-                  className={cn(
-                    'relative flex min-h-12 items-center justify-center gap-2 border-b-2 text-base font-semibold transition-colors',
-                    on ? 'border-brand text-brand-text' : 'border-transparent text-ink-2 hover:bg-hover',
-                  )}
-                >
-                  {t === 'plan' ? 'Plan' : 'Chat'}
-                  {t === 'chat' && unread > 0 && (
-                    <span className="size-2.5 rounded-full bg-[var(--rw-danger)]" role="img" aria-label={`${unread} unread ${unread === 1 ? 'message' : 'messages'}`} />
-                  )}
-                  {t === 'plan' && planDot && !on && <span className="size-2.5 rounded-full bg-brand" role="img" aria-label="The plan changed" />}
-                </button>
-              )
-            })}
-          </div>
-
+      <BoardFlashProvider room={room} onPlanChanged={() => setPlanDot(true)}>
+        <main id="main" data-chat-open={chatExpanded} className="room-workspace flex min-h-0 flex-1 flex-col">
+          {/* The plan: its own scroll. On phones it is one of two tabs. */}
           <section
-            id="room-chat-panel"
+            id="room-plan-panel"
             role={wide ? undefined : 'tabpanel'}
-            aria-label="Chat"
-            aria-labelledby={wide ? undefined : 'room-tab-chat'}
-            className={cn('order-3 min-h-0 flex-1 flex-col', tab === 'chat' ? 'flex' : 'hidden', 'lg:order-none lg:flex')}
+            aria-label="Plan"
+            aria-labelledby={wide ? undefined : 'room-tab-plan'}
+            className={cn('room-plan-panel order-3 min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain', tab === 'plan' ? 'block' : 'hidden', 'lg:order-none lg:block')}
           >
-            <Conversation
-              room={room}
-              me={me}
-              messages={messages}
-              onSend={sendMessage}
-              onSummon={() => void summon()}
-              onDismiss={() => void dismiss()}
-              agentBusy={agentBusy}
-              agentError={agentError}
-            />
+            <PlanBoard room={room} me={me} onDecide={approve} />
           </section>
-        </div>
-      </main>
+
+          {/* The discussion: video strip on top, then the conversation. `contents` lets the phone order these with the tabs. */}
+          <div className="room-discussion contents lg:flex lg:min-h-0 lg:min-w-0 lg:flex-col lg:border-l lg:border-line">
+            <div className="order-1 shrink-0 lg:order-none">
+              <VideoStrip room={room} me={me} rtc={rtc} />
+              <PandaCompanion
+                room={room}
+                rtc={rtc}
+                agentUid={agentUidNow}
+                connecting={agentBusy && !room.agent.live}
+                controls={anyCameraOn(rtc) ? null : <CallControls rtc={rtc} />}
+              />
+              {wide && room.plan.open_questions.some((question) => !question.resolved) && (
+                <div className="room-discussion-questions"><QuestionsCard room={room} /></div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="room-chat-toggle"
+              aria-expanded={chatExpanded}
+              aria-controls="room-conversation-history"
+              onClick={() => setChatExpanded((open) => !open)}
+            >
+              <MessageSquare className="size-4" aria-hidden="true" />
+              <span>{chatExpanded ? 'Collapse conversation' : 'Expand conversation'}</span>
+              {!chatExpanded && unread > 0 && <span className="room-unread" aria-label={`${unread} unread ${unread === 1 ? 'message' : 'messages'}`}>{unread}</span>}
+              {chatExpanded ? <ChevronUp className="ml-auto size-4" aria-hidden="true" /> : <ChevronDown className="ml-auto size-4" aria-hidden="true" />}
+            </button>
+
+            <div role="tablist" aria-label="Plan or chat" className="order-2 grid grid-cols-2 border-b border-line bg-surface lg:hidden">
+              {(['plan', 'chat'] as const).map((t) => {
+                const on = tab === t
+                return (
+                  <button
+                    key={t}
+                    id={`room-tab-${t}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={on}
+                    aria-controls={t === 'plan' ? 'room-plan-panel' : 'room-chat-panel'}
+                    onClick={() => setTab(t)}
+                    className={cn(
+                      'relative flex min-h-12 items-center justify-center gap-2 border-b-2 text-base font-semibold transition-colors',
+                      on ? 'border-brand text-brand-text' : 'border-transparent text-ink-2 hover:bg-hover',
+                    )}
+                  >
+                    {t === 'plan' ? 'Plan' : 'Chat'}
+                    {t === 'chat' && unread > 0 && (
+                      <span className="size-2.5 rounded-full bg-[var(--rw-danger)]" role="img" aria-label={`${unread} unread ${unread === 1 ? 'message' : 'messages'}`} />
+                    )}
+                    {t === 'plan' && planDot && !on && <span className="size-2.5 rounded-full bg-brand" role="img" aria-label="The plan changed" />}
+                  </button>
+                )
+              })}
+            </div>
+
+            <section
+              id="room-chat-panel"
+              role={wide ? undefined : 'tabpanel'}
+              aria-label="Chat"
+              aria-labelledby={wide ? undefined : 'room-tab-chat'}
+              className={cn('order-3 min-h-0 flex-1 flex-col', tab === 'chat' ? 'flex' : 'hidden', 'lg:order-none lg:flex')}
+            >
+              <Conversation
+                room={room}
+                me={me}
+                messages={messages}
+                onSend={sendMessage}
+                onSummon={() => void summon()}
+                onDismiss={() => void dismiss()}
+                agentBusy={agentBusy}
+                agentError={agentError}
+                historyOpen={!wide || chatExpanded}
+              />
+            </section>
+          </div>
+        </main>
+      </BoardFlashProvider>
     </div>
   )
 }
