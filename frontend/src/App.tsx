@@ -1,4 +1,5 @@
 import { CloudOff } from 'lucide-react'
+import { lazy, Suspense } from 'react'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { PwaProvider } from '@/pwa/PwaProvider'
@@ -13,6 +14,10 @@ import { Button, EmptyState, ScreenSkeleton } from '@/ui/primitives'
 import { SideRail } from '@/ui/SideRail'
 import { AskTab, FamilyTab } from '@/ui/TabViews'
 import { useTheme } from '@/theme/useTheme'
+import { useRoomId } from '@/room/roomRoute'
+
+// The Family Room (and Leaflet, Agora) load only when a room is opened.
+const RoomScreen = lazy(() => import('@/room/RoomScreen').then((m) => ({ default: m.RoomScreen })))
 
 const SCREENS: Record<Tab, () => React.ReactNode> = {
   home: () => <Home />,
@@ -81,12 +86,23 @@ function Shell() {
   )
 }
 
+/** `?room=<id>` (an invite link) shows the room instead of the tabs, even before this device has a profile: guests only give a name. */
+function Routes() {
+  const roomId = useRoomId()
+  if (!roomId) return <Shell />
+  return (
+    <Suspense fallback={<div className="h-dvh overflow-y-auto bg-bg text-ink"><ScreenSkeleton /></div>}>
+      <RoomScreen roomId={roomId} />
+    </Suspense>
+  )
+}
+
 export default function App() {
   return (
     <TooltipProvider>
       <PwaProvider>
         <AppProvider>
-          <Shell />
+          <Routes />
         </AppProvider>
       </PwaProvider>
     </TooltipProvider>

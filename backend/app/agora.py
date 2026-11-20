@@ -78,15 +78,18 @@ def failure_message_for(state: FamilyState, member_id: str) -> str:
     return "Ek second, dobara bolenge?" if state.speaks_hindi(member_id) else "One moment, could you say that again?"
 
 
-def build_agent(cfg: Settings, client: Agora, state: FamilyState, member_id: str) -> Agent:
+def build_agent(cfg: Settings, client: Agora, state: FamilyState, member_id: str, query: str = "",
+                greeting: str | None = None, instructions: str | None = None) -> Agent:
+    """The voice agent for `member_id`. `query` (for example "&room=r-1&participant=p-1") is appended to the custom LLM URL,
+    which is how a room's agent reaches the room brain; `greeting` and `instructions` replace the personal defaults."""
     member = state.member(member_id)
     voice = voices.voice_for(member)
-    greeting = greeting_for(state, member_id)
+    greeting = greeting or greeting_for(state, member_id)
     failure = failure_message_for(state, member_id)
     return (
         Agent(
             client=client,
-            instructions=SYSTEM_PROMPT,
+            instructions=instructions or SYSTEM_PROMPT,
             greeting=greeting,
             failure_message=failure,
             max_history=50,
@@ -100,7 +103,7 @@ def build_agent(cfg: Settings, client: Agora, state: FamilyState, member_id: str
             CustomLLM(
                 api_key=cfg.llm_api_key,
                 model="aangan-agent",
-                base_url=f"{cfg.public_base_url}/v1/chat/completions?member={member_id}",
+                base_url=f"{cfg.public_base_url}/v1/chat/completions?member={member_id}{query}",
                 greeting_message=greeting,
                 failure_message=failure,
                 max_history=15,
@@ -116,11 +119,11 @@ def build_agent(cfg: Settings, client: Agora, state: FamilyState, member_id: str
     )
 
 
-def _start_session(agent: Agent, channel: str, user_uid: int) -> str:
+def _start_session(agent: Agent, channel: str, user_uid: int, remote_uids: list[str] | None = None) -> str:
     session = agent.create_session(
         channel=channel,
         agent_uid=str(AGENT_UID),
-        remote_uids=[str(user_uid)],
+        remote_uids=remote_uids or [str(user_uid)],
         idle_timeout=IDLE_TIMEOUT_S,
         expires_in=expires_in_hours(1),
     )
@@ -191,3 +194,55 @@ def stop_agent(cfg: Settings) -> dict:
     _stop_agent_id(cfg, agent_id)
     SESSION.clear()
     return {"stopped": True, "agent_id": agent_id}
+
+
+# --- Family Rooms: one voice agent per room, listening to everyone in the room's channel. Room agents are tracked on
+# the room itself, never in SESSION, so the single-user call above keeps its own one-session rule untouched.
+
+ROOM_PROMPT = (
+    "You are Aangan, a warm voice assistant in a family planning room where several people talk together. "
+    "Keep replies to one or two short spoken sentences. Reply in the language the user speaks."
+)
+ROOM_GREETING = {
+    "en": "Hello everyone, Aangan here. Tell me what you are planning and I will keep the plan.",
+    "hi": "नमस्ते सब लोग, मैं आँगन हूँ। बताइए आप क्या योजना बना रहे हैं, मैं प्लान संभाल लूँगा।",
+    "te": "నమస్కారం అందరికీ, నేను ఆంగన్. మీరు ఏమి ప్లాన్ చేస్తున్నారో చెప్పండి, నేను ప్లాన్‌ను చూసుకుంటాను.",
+    "kn": "ನಮಸ್ಕಾರ ಎಲ್ಲರಿಗೂ, ನಾನು ಆಂಗನ್. ನೀವು ಏನು ಯೋಜನೆ ಮಾಡುತ್ತಿದ್ದೀರಿ ಎಂದು ಹೇಳಿ, ನಾನು ಪ್ಲಾನ್ ನೋಡಿಕೊಳ್ಳುತ್ತೇನೆ.",
+}
+
+
+def room_greeting(state: FamilyState, member_id: str) -> str:
+    opening = _opening_language(state, member_id)
+    return ROOM_GREETING[opening.code if opening else "en"]
+
+
+def room_channel(room_id: str) -> str:
+    return f"room-{room_id}"
+
+
+def start_room_agent(cfg: Settings, state: FamilyState, room_id: str, member_id: str, participant_id: str, user_uid: int) -> dict:
+    """Start the Aangan voice agent in the room's channel. It listens to everyone there (remote uid "*"); if Agora rejects
+    that, it falls back to the starter's own uid. Its LLM calls carry the room and the participant, so the room brain answers."""
+    missing = cfg.missing_voice()
+    if missing:
+        raise ServiceNotConfigured(missing)
+    greeting = room_greeting(state, member_id)
+    agent = build_agent(
+        cfg, _client(cfg), state, member_id, query=f"&room={room_id}&participant={participant_id}",
+        greeting=greeting, instructions=ROOM_PROMPT,
+    )
+    channel = room_channel(room_id)
+    listening = ["*"]
+    try:
+        agent_id = _start_session(agent, channel, user_uid, listening)
+    except Exception:
+        listening = [str(user_uid)]  # "*" refused: listen to the person who started it
+        agent_id = _start_session(agent, channel, user_uid, listening)
+    return {
+        "agent_id": agent_id, "agent_uid": str(AGENT_UID), "greeting": greeting, "channel": channel, "listening_to": listening,
+        "gender": voices.infer_gender(state.member(member_id)),
+    }
+
+
+def stop_room_agent(cfg: Settings, agent_id: str) -> None:
+    _stop_agent_id(cfg, agent_id)

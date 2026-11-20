@@ -1,4 +1,4 @@
-import type { AppConfig, Snapshot, ToolSpec, VoiceSession } from './types'
+import type { AppConfig, Participant, Room, RoomAgentSession, RoomRtcSession, RoomUnchanged, Snapshot, ToolSpec, VoiceSession } from './types'
 
 export class ApiError extends Error {
   status: number
@@ -29,6 +29,11 @@ function messageFrom(detail: unknown, status: number): string {
 }
 
 async function request<T>(path: string, body?: unknown): Promise<T> {
+  // Development only: `?mock=1` answers the room endpoints from an in-memory room (src/room/mockRoom.ts). Removed from production builds.
+  if (import.meta.env.DEV && path.startsWith('/rooms') && new URLSearchParams(location.search).get('mock') === '1') {
+    const { mockRoomRequest } = await import('./room/mockRoom')
+    return (await mockRoomRequest(path, body)) as T
+  }
   let res: Response
   try {
     res = await fetch(`/api${path}`, {
@@ -72,4 +77,19 @@ export const api = {
   },
   agentStart: (member_id: string) => request<VoiceSession>('/agent/start', { member_id }),
   agentStop: () => request<{ stopped: boolean }>('/agent/stop', {}),
+  room: {
+    create: (title: string, member_id: string | null) => request<Room>('/rooms', { title, member_id }),
+    /** `since` is the version the client already has; the server answers `{unchanged: true}` when it is current. */
+    get: (id: string, since?: number) => request<Room | RoomUnchanged>(`/rooms/${encodeURIComponent(id)}${since === undefined ? '' : `?since=${since}`}`),
+    join: (id: string, who: { member_id: string } | { guest_name: string }) =>
+      request<{ participant: Participant; room: Room }>(`/rooms/${encodeURIComponent(id)}/join`, who),
+    heartbeat: (id: string, participant_id: string) => request<{ ok: boolean }>(`/rooms/${encodeURIComponent(id)}/heartbeat`, { participant_id }),
+    message: (id: string, participant_id: string, text: string, ask?: boolean) =>
+      request<Room>(`/rooms/${encodeURIComponent(id)}/message`, ask ? { participant_id, text, ask: true } : { participant_id, text }),
+    approve: (id: string, participant_id: string, approve: boolean) => request<Room>(`/rooms/${encodeURIComponent(id)}/approve`, { participant_id, approve }),
+    rtc: (id: string, participant_id: string) => request<RoomRtcSession>(`/rooms/${encodeURIComponent(id)}/rtc`, { participant_id }),
+    agentStart: (id: string, participant_id: string) => request<RoomAgentSession>(`/rooms/${encodeURIComponent(id)}/agent/start`, { participant_id }),
+    agentStop: (id: string) => request<{ stopped: boolean }>(`/rooms/${encodeURIComponent(id)}/agent/stop`, {}),
+    resetPlan: (id: string) => request<Room>(`/rooms/${encodeURIComponent(id)}/reset-plan`, {}),
+  },
 }

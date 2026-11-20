@@ -1,0 +1,96 @@
+/* Family Room: the glow on a card or row that just changed, and the map pins. Colours come from the Redwood tokens in index.css. */
+@keyframes room-flash {
+  0% {
+    background-color: var(--brand-soft);
+    box-shadow: 0 0 0 2px var(--selected-edge);
+  }
+  70% {
+    background-color: var(--brand-soft);
+    box-shadow: 0 0 0 2px var(--selected-edge);
+  }
+  100% {
+    background-color: var(--surface);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+@keyframes room-flash-row {
+  0%,
+  65% {
+    background-color: var(--brand-soft);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+.room-flash {
+  animation: room-flash 2.4s var(--rw-ease-out) backwards;
+}
+.room-flash-row {
+  animation: room-flash-row 2.4s var(--rw-ease-out) backwards;
+}
+
+@keyframes room-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.room-pop {
+  animation: room-pop var(--rw-duration-medium) var(--rw-ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-flash,
+  .room-flash-row,
+  .room-pop {
+    animation: none;
+  }
+  /* No movement, but the change is still marked while the class is on. */
+  .room-flash {
+    box-shadow: 0 0 0 2px var(--selected-edge);
+    background-color: var(--brand-soft);
+  }
+  .room-flash-row {
+    background-color: var(--brand-soft);
+  }
+}
+
+/* Map pins are plain divs (no image files to bundle). */
+.room-pin {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+.room-pin--dot {
+  width: 16px;
+  height: 16px;
+}
+.room-map .leaflet-container {
+  font-family: var(--rw-font);
+  background: rgb(var(--rw-neutral-30));
+}
+.room-map .leaflet-control-attribution {
+  font-size: 10px;
+}
+
+/* Bigger zoom buttons for fingers. */
+@media (pointer: coarse), (max-width: 1023px) {
+  .room-map .leaflet-bar a {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    font-size: 22px;
+  }
+}

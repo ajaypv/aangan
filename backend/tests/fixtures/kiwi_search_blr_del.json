@@ -1,0 +1,732 @@
+{
+ "jsonrpc": "2.0",
+ "id": 2,
+ "result": {
+  "content": [
+   {
+    "text": "{\n  \"query\": \"BLR → DEL on 18/12/2026, 1 adult\",\n  \"currency\": \"INR\",\n  \"passengers\": {\n    \"adults\": 1,\n    \"children\": 0,\n    \"infants\": 0\n  },\n  \"resultsCount\": 15,\n  \"itineraries\": [\n    {\n      \"id\": \"18c70711514500002d1f454d_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 10722.0,\n      \"priceFormatted\": \"10722 INR\",\n      \"totalDurationSeconds\": 10800,\n      \"bookingUrl\": \"https://kiwi.com/u/k2szz8p2hd\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T05:30:00\",\n        \"arrivalTime\": \"2026-12-18T08:30:00\",\n        \"durationSeconds\": 10800,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T05:30:00\",\n            \"arrivalTime\": \"2026-12-18T08:30:00\",\n            \"durationSeconds\": 10800,\n            \"carrier\": \"IX\",\n            \"carrierName\": \"Air India Express\",\n            \"flightNumber\": \"IX1040\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7071151450000cf25c53f_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 10880.0,\n      \"priceFormatted\": \"10880 INR\",\n      \"totalDurationSeconds\": 10200,\n      \"bookingUrl\": \"https://kiwi.com/u/bst9pdqfn5\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T05:00:00\",\n        \"arrivalTime\": \"2026-12-18T07:50:00\",\n        \"durationSeconds\": 10200,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T05:00:00\",\n            \"arrivalTime\": \"2026-12-18T07:50:00\",\n            \"durationSeconds\": 10200,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI2516\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7071151450000125486ed_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 11337.0,\n      \"priceFormatted\": \"11337 INR\",\n      \"totalDurationSeconds\": 10800,\n      \"bookingUrl\": \"https://kiwi.com/u/nngkf65z2v\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T05:30:00\",\n        \"arrivalTime\": \"2026-12-18T08:30:00\",\n        \"durationSeconds\": 10800,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T05:30:00\",\n            \"arrivalTime\": \"2026-12-18T08:30:00\",\n            \"durationSeconds\": 10800,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI9547\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70711514500008ac89d27_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 11338.0,\n      \"priceFormatted\": \"11338 INR\",\n      \"totalDurationSeconds\": 10200,\n      \"bookingUrl\": \"https://kiwi.com/u/3jyns75zud\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 0,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T06:10:00\",\n        \"arrivalTime\": \"2026-12-18T09:00:00\",\n        \"durationSeconds\": 10200,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T06:10:00\",\n            \"arrivalTime\": \"2026-12-18T09:00:00\",\n            \"durationSeconds\": 10200,\n            \"carrier\": \"SG\",\n            \"carrierName\": \"Spicejet\",\n            \"flightNumber\": \"SG141\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70711514500004f75f952_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 11517.0,\n      \"priceFormatted\": \"11517 INR\",\n      \"totalDurationSeconds\": 10500,\n      \"bookingUrl\": \"https://kiwi.com/u/95q4nrx2nd\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T00:15:00\",\n        \"arrivalTime\": \"2026-12-18T03:10:00\",\n        \"durationSeconds\": 10500,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T00:15:00\",\n            \"arrivalTime\": \"2026-12-18T03:10:00\",\n            \"durationSeconds\": 10500,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI2758\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7071151450000e4e3319e_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 11967.0,\n      \"priceFormatted\": \"11967 INR\",\n      \"totalDurationSeconds\": 10200,\n      \"bookingUrl\": \"https://kiwi.com/u/zxygvqy5nh\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 0,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T04:10:00\",\n        \"arrivalTime\": \"2026-12-18T07:00:00\",\n        \"durationSeconds\": 10200,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T04:10:00\",\n            \"arrivalTime\": \"2026-12-18T07:00:00\",\n            \"durationSeconds\": 10200,\n            \"carrier\": \"QP\",\n            \"carrierName\": \"Akasa Air\",\n            \"flightNumber\": \"QP1811\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70711514500002e9ef359_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 12072.0,\n      \"priceFormatted\": \"12072 INR\",\n      \"totalDurationSeconds\": 9900,\n      \"bookingUrl\": \"https://kiwi.com/u/tdb6vzfqyc\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T06:00:00\",\n        \"arrivalTime\": \"2026-12-18T08:45:00\",\n        \"durationSeconds\": 9900,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T06:00:00\",\n            \"arrivalTime\": \"2026-12-18T08:45:00\",\n            \"durationSeconds\": 9900,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI2810\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c707115145000039746536_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 12523.0,\n      \"priceFormatted\": \"12523 INR\",\n      \"totalDurationSeconds\": 10200,\n      \"bookingUrl\": \"https://kiwi.com/u/8jbcnnsyzz\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 0,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T13:55:00\",\n        \"arrivalTime\": \"2026-12-18T16:45:00\",\n        \"durationSeconds\": 10200,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T13:55:00\",\n            \"arrivalTime\": \"2026-12-18T16:45:00\",\n            \"durationSeconds\": 10200,\n            \"carrier\": \"QP\",\n            \"carrierName\": \"Akasa Air\",\n            \"flightNumber\": \"QP1381\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c707115145000021c00371_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 12975.0,\n      \"priceFormatted\": \"12975 INR\",\n      \"totalDurationSeconds\": 10200,\n      \"bookingUrl\": \"https://kiwi.com/u/bsbw2bcx3x\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 0,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T06:10:00\",\n        \"arrivalTime\": \"2026-12-18T09:00:00\",\n        \"durationSeconds\": 10200,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T06:10:00\",\n            \"arrivalTime\": \"2026-12-18T09:00:00\",\n            \"durationSeconds\": 10200,\n            \"carrier\": \"QP\",\n            \"carrierName\": \"Akasa Air\",\n            \"flightNumber\": \"QP1823\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7071151450000f1adef3e_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 12975.0,\n      \"priceFormatted\": \"12975 INR\",\n      \"totalDurationSeconds\": 10500,\n      \"bookingUrl\": \"https://kiwi.com/u/z22fnuh549\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 0,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T05:00:00\",\n        \"arrivalTime\": \"2026-12-18T07:55:00\",\n        \"durationSeconds\": 10500,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T05:00:00\",\n            \"arrivalTime\": \"2026-12-18T07:55:00\",\n            \"durationSeconds\": 10500,\n            \"carrier\": \"QP\",\n            \"carrierName\": \"Akasa Air\",\n            \"flightNumber\": \"QP1301\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70711514500004c3f9abe_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 13385.0,\n      \"priceFormatted\": \"13385 INR\",\n      \"totalDurationSeconds\": 9600,\n      \"bookingUrl\": \"https://kiwi.com/u/x683ws49v5\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T10:45:00\",\n        \"arrivalTime\": \"2026-12-18T13:25:00\",\n        \"durationSeconds\": 9600,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T10:45:00\",\n            \"arrivalTime\": \"2026-12-18T13:25:00\",\n            \"durationSeconds\": 9600,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E2328\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70711514500004701df4e_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 13729.0,\n      \"priceFormatted\": \"13729 INR\",\n      \"totalDurationSeconds\": 9900,\n      \"bookingUrl\": \"https://kiwi.com/u/p5twvnm7bc\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T07:00:00\",\n        \"arrivalTime\": \"2026-12-18T09:45:00\",\n        \"durationSeconds\": 9900,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T07:00:00\",\n            \"arrivalTime\": \"2026-12-18T09:45:00\",\n            \"durationSeconds\": 9900,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI2654\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7071151450000d7fc9e49_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 14015.0,\n      \"priceFormatted\": \"14015 INR\",\n      \"totalDurationSeconds\": 10200,\n      \"bookingUrl\": \"https://kiwi.com/u/qhgb9x43nc\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T11:00:00\",\n        \"arrivalTime\": \"2026-12-18T13:50:00\",\n        \"durationSeconds\": 10200,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T11:00:00\",\n            \"arrivalTime\": \"2026-12-18T13:50:00\",\n            \"durationSeconds\": 10200,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI2406\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70711514500001cadf3a1_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 14201.0,\n      \"priceFormatted\": \"14201 INR\",\n      \"totalDurationSeconds\": 10800,\n      \"bookingUrl\": \"https://kiwi.com/u/8wnzj7vuwx\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T21:25:00\",\n        \"arrivalTime\": \"2026-12-19T00:25:00\",\n        \"durationSeconds\": 10800,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T21:25:00\",\n            \"arrivalTime\": \"2026-12-19T00:25:00\",\n            \"durationSeconds\": 10800,\n            \"carrier\": \"IX\",\n            \"carrierName\": \"Air India Express\",\n            \"flightNumber\": \"IX1260\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70711514500006f04edac_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 14241.0,\n      \"priceFormatted\": \"14241 INR\",\n      \"totalDurationSeconds\": 10500,\n      \"bookingUrl\": \"https://kiwi.com/u/np9cskt525\",\n      \"imageId\": \"new-delhi_in\",\n      \"baggage\": {\n        \"personalItem\": 1,\n        \"cabinBag\": 1,\n        \"checkedBag\": 1\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"DEL\",\n        \"departureTime\": \"2026-12-18T08:05:00\",\n        \"arrivalTime\": \"2026-12-18T11:00:00\",\n        \"durationSeconds\": 10500,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"DEL\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"DEL\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"New Delhi\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Indira Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T08:05:00\",\n            \"arrivalTime\": \"2026-12-18T11:00:00\",\n            \"durationSeconds\": 10500,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI2868\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    }\n  ],\n  \"searchTimeMs\": 2274,\n  \"error\": null\n}",
+    "type": "text"
+   }
+  ],
+  "isError": false,
+  "structuredContent": {
+   "query": "BLR → DEL on 18/12/2026, 1 adult",
+   "currency": "INR",
+   "passengers": {
+    "adults": 1,
+    "children": 0,
+    "infants": 0
+   },
+   "resultsCount": 15,
+   "itineraries": [
+    {
+     "id": "18c70711514500002d1f454d_0",
+     "tripType": "oneway",
+     "price": 10722.0,
+     "priceFormatted": "10722 INR",
+     "totalDurationSeconds": 10800,
+     "bookingUrl": "https://kiwi.com/u/k2szz8p2hd",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T05:30:00",
+      "arrivalTime": "2026-12-18T08:30:00",
+      "durationSeconds": 10800,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T05:30:00",
+        "arrivalTime": "2026-12-18T08:30:00",
+        "durationSeconds": 10800,
+        "carrier": "IX",
+        "carrierName": "Air India Express",
+        "flightNumber": "IX1040",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7071151450000cf25c53f_0",
+     "tripType": "oneway",
+     "price": 10880.0,
+     "priceFormatted": "10880 INR",
+     "totalDurationSeconds": 10200,
+     "bookingUrl": "https://kiwi.com/u/bst9pdqfn5",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T05:00:00",
+      "arrivalTime": "2026-12-18T07:50:00",
+      "durationSeconds": 10200,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T05:00:00",
+        "arrivalTime": "2026-12-18T07:50:00",
+        "durationSeconds": 10200,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI2516",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7071151450000125486ed_0",
+     "tripType": "oneway",
+     "price": 11337.0,
+     "priceFormatted": "11337 INR",
+     "totalDurationSeconds": 10800,
+     "bookingUrl": "https://kiwi.com/u/nngkf65z2v",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T05:30:00",
+      "arrivalTime": "2026-12-18T08:30:00",
+      "durationSeconds": 10800,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T05:30:00",
+        "arrivalTime": "2026-12-18T08:30:00",
+        "durationSeconds": 10800,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI9547",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70711514500008ac89d27_0",
+     "tripType": "oneway",
+     "price": 11338.0,
+     "priceFormatted": "11338 INR",
+     "totalDurationSeconds": 10200,
+     "bookingUrl": "https://kiwi.com/u/3jyns75zud",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 0,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T06:10:00",
+      "arrivalTime": "2026-12-18T09:00:00",
+      "durationSeconds": 10200,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T06:10:00",
+        "arrivalTime": "2026-12-18T09:00:00",
+        "durationSeconds": 10200,
+        "carrier": "SG",
+        "carrierName": "Spicejet",
+        "flightNumber": "SG141",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70711514500004f75f952_0",
+     "tripType": "oneway",
+     "price": 11517.0,
+     "priceFormatted": "11517 INR",
+     "totalDurationSeconds": 10500,
+     "bookingUrl": "https://kiwi.com/u/95q4nrx2nd",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T00:15:00",
+      "arrivalTime": "2026-12-18T03:10:00",
+      "durationSeconds": 10500,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T00:15:00",
+        "arrivalTime": "2026-12-18T03:10:00",
+        "durationSeconds": 10500,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI2758",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7071151450000e4e3319e_0",
+     "tripType": "oneway",
+     "price": 11967.0,
+     "priceFormatted": "11967 INR",
+     "totalDurationSeconds": 10200,
+     "bookingUrl": "https://kiwi.com/u/zxygvqy5nh",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 0,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T04:10:00",
+      "arrivalTime": "2026-12-18T07:00:00",
+      "durationSeconds": 10200,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T04:10:00",
+        "arrivalTime": "2026-12-18T07:00:00",
+        "durationSeconds": 10200,
+        "carrier": "QP",
+        "carrierName": "Akasa Air",
+        "flightNumber": "QP1811",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70711514500002e9ef359_0",
+     "tripType": "oneway",
+     "price": 12072.0,
+     "priceFormatted": "12072 INR",
+     "totalDurationSeconds": 9900,
+     "bookingUrl": "https://kiwi.com/u/tdb6vzfqyc",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T06:00:00",
+      "arrivalTime": "2026-12-18T08:45:00",
+      "durationSeconds": 9900,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T06:00:00",
+        "arrivalTime": "2026-12-18T08:45:00",
+        "durationSeconds": 9900,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI2810",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c707115145000039746536_0",
+     "tripType": "oneway",
+     "price": 12523.0,
+     "priceFormatted": "12523 INR",
+     "totalDurationSeconds": 10200,
+     "bookingUrl": "https://kiwi.com/u/8jbcnnsyzz",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 0,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T13:55:00",
+      "arrivalTime": "2026-12-18T16:45:00",
+      "durationSeconds": 10200,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T13:55:00",
+        "arrivalTime": "2026-12-18T16:45:00",
+        "durationSeconds": 10200,
+        "carrier": "QP",
+        "carrierName": "Akasa Air",
+        "flightNumber": "QP1381",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c707115145000021c00371_0",
+     "tripType": "oneway",
+     "price": 12975.0,
+     "priceFormatted": "12975 INR",
+     "totalDurationSeconds": 10200,
+     "bookingUrl": "https://kiwi.com/u/bsbw2bcx3x",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 0,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T06:10:00",
+      "arrivalTime": "2026-12-18T09:00:00",
+      "durationSeconds": 10200,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T06:10:00",
+        "arrivalTime": "2026-12-18T09:00:00",
+        "durationSeconds": 10200,
+        "carrier": "QP",
+        "carrierName": "Akasa Air",
+        "flightNumber": "QP1823",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7071151450000f1adef3e_0",
+     "tripType": "oneway",
+     "price": 12975.0,
+     "priceFormatted": "12975 INR",
+     "totalDurationSeconds": 10500,
+     "bookingUrl": "https://kiwi.com/u/z22fnuh549",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 0,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T05:00:00",
+      "arrivalTime": "2026-12-18T07:55:00",
+      "durationSeconds": 10500,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T05:00:00",
+        "arrivalTime": "2026-12-18T07:55:00",
+        "durationSeconds": 10500,
+        "carrier": "QP",
+        "carrierName": "Akasa Air",
+        "flightNumber": "QP1301",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70711514500004c3f9abe_0",
+     "tripType": "oneway",
+     "price": 13385.0,
+     "priceFormatted": "13385 INR",
+     "totalDurationSeconds": 9600,
+     "bookingUrl": "https://kiwi.com/u/x683ws49v5",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T10:45:00",
+      "arrivalTime": "2026-12-18T13:25:00",
+      "durationSeconds": 9600,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T10:45:00",
+        "arrivalTime": "2026-12-18T13:25:00",
+        "durationSeconds": 9600,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E2328",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70711514500004701df4e_0",
+     "tripType": "oneway",
+     "price": 13729.0,
+     "priceFormatted": "13729 INR",
+     "totalDurationSeconds": 9900,
+     "bookingUrl": "https://kiwi.com/u/p5twvnm7bc",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T07:00:00",
+      "arrivalTime": "2026-12-18T09:45:00",
+      "durationSeconds": 9900,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T07:00:00",
+        "arrivalTime": "2026-12-18T09:45:00",
+        "durationSeconds": 9900,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI2654",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7071151450000d7fc9e49_0",
+     "tripType": "oneway",
+     "price": 14015.0,
+     "priceFormatted": "14015 INR",
+     "totalDurationSeconds": 10200,
+     "bookingUrl": "https://kiwi.com/u/qhgb9x43nc",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T11:00:00",
+      "arrivalTime": "2026-12-18T13:50:00",
+      "durationSeconds": 10200,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T11:00:00",
+        "arrivalTime": "2026-12-18T13:50:00",
+        "durationSeconds": 10200,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI2406",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70711514500001cadf3a1_0",
+     "tripType": "oneway",
+     "price": 14201.0,
+     "priceFormatted": "14201 INR",
+     "totalDurationSeconds": 10800,
+     "bookingUrl": "https://kiwi.com/u/8wnzj7vuwx",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T21:25:00",
+      "arrivalTime": "2026-12-19T00:25:00",
+      "durationSeconds": 10800,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T21:25:00",
+        "arrivalTime": "2026-12-19T00:25:00",
+        "durationSeconds": 10800,
+        "carrier": "IX",
+        "carrierName": "Air India Express",
+        "flightNumber": "IX1260",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70711514500006f04edac_0",
+     "tripType": "oneway",
+     "price": 14241.0,
+     "priceFormatted": "14241 INR",
+     "totalDurationSeconds": 10500,
+     "bookingUrl": "https://kiwi.com/u/np9cskt525",
+     "imageId": "new-delhi_in",
+     "baggage": {
+      "personalItem": 1,
+      "cabinBag": 1,
+      "checkedBag": 1
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "DEL",
+      "departureTime": "2026-12-18T08:05:00",
+      "arrivalTime": "2026-12-18T11:00:00",
+      "durationSeconds": 10500,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "DEL"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "DEL",
+        "fromCity": "Bengaluru",
+        "toCity": "New Delhi",
+        "fromName": "Bengaluru International",
+        "toName": "Indira Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T08:05:00",
+        "arrivalTime": "2026-12-18T11:00:00",
+        "durationSeconds": 10500,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI2868",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    }
+   ],
+   "searchTimeMs": 2274,
+   "error": null
+  }
+ }
+}

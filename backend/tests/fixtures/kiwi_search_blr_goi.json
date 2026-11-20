@@ -1,0 +1,894 @@
+{
+ "jsonrpc": "2.0",
+ "id": 2,
+ "result": {
+  "content": [
+   {
+    "text": "{\n  \"query\": \"BLR → GOI on 18/12/2026, 2 adults\",\n  \"currency\": \"INR\",\n  \"passengers\": {\n    \"adults\": 2,\n    \"children\": 0,\n    \"infants\": 0\n  },\n  \"resultsCount\": 15,\n  \"itineraries\": [\n    {\n      \"id\": \"18c7207c51450000dfbbf17b_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 14042.0,\n      \"priceFormatted\": \"14042 INR\",\n      \"totalDurationSeconds\": 5100,\n      \"bookingUrl\": \"https://kiwi.com/u/vx76wmbty5\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T17:45:00\",\n        \"arrivalTime\": \"2026-12-18T19:10:00\",\n        \"durationSeconds\": 5100,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T17:45:00\",\n            \"arrivalTime\": \"2026-12-18T19:10:00\",\n            \"durationSeconds\": 5100,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI9563\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7207c5145000014c6d941_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 14071.0,\n      \"priceFormatted\": \"14071 INR\",\n      \"totalDurationSeconds\": 5100,\n      \"bookingUrl\": \"https://kiwi.com/u/545vngms9t\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T17:45:00\",\n        \"arrivalTime\": \"2026-12-18T19:10:00\",\n        \"durationSeconds\": 5100,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T17:45:00\",\n            \"arrivalTime\": \"2026-12-18T19:10:00\",\n            \"durationSeconds\": 5100,\n            \"carrier\": \"IX\",\n            \"carrierName\": \"Air India Express\",\n            \"flightNumber\": \"IX1386\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7207c51450000630061a9_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 21189.0,\n      \"priceFormatted\": \"21189 INR\",\n      \"totalDurationSeconds\": 5100,\n      \"bookingUrl\": \"https://kiwi.com/u/7njwprm3mb\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T11:05:00\",\n        \"arrivalTime\": \"2026-12-18T12:30:00\",\n        \"durationSeconds\": 5100,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T11:05:00\",\n            \"arrivalTime\": \"2026-12-18T12:30:00\",\n            \"durationSeconds\": 5100,\n            \"carrier\": \"IX\",\n            \"carrierName\": \"Air India Express\",\n            \"flightNumber\": \"IX1539\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7207c51450000b7efe6af_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 21819.0,\n      \"priceFormatted\": \"21819 INR\",\n      \"totalDurationSeconds\": 5400,\n      \"bookingUrl\": \"https://kiwi.com/u/ntjsnbhkm8\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T05:20:00\",\n        \"arrivalTime\": \"2026-12-18T06:50:00\",\n        \"durationSeconds\": 5400,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T05:20:00\",\n            \"arrivalTime\": \"2026-12-18T06:50:00\",\n            \"durationSeconds\": 5400,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI9491\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7207c514500006f37a482_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 21878.0,\n      \"priceFormatted\": \"21878 INR\",\n      \"totalDurationSeconds\": 5100,\n      \"bookingUrl\": \"https://kiwi.com/u/wy8x35w8rz\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T11:05:00\",\n        \"arrivalTime\": \"2026-12-18T12:30:00\",\n        \"durationSeconds\": 5100,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T11:05:00\",\n            \"arrivalTime\": \"2026-12-18T12:30:00\",\n            \"durationSeconds\": 5100,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI9801\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c706c1514500006fd0b26a_0|06c1207c5146000084802f97_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 22005.0,\n      \"priceFormatted\": \"22005 INR\",\n      \"totalDurationSeconds\": 31800,\n      \"bookingUrl\": \"https://kiwi.com/u/29vks49946\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T21:50:00\",\n        \"arrivalTime\": \"2026-12-19T06:40:00\",\n        \"durationSeconds\": 31800,\n        \"stops\": 1,\n        \"route\": [\n          \"BLR\",\n          \"HYD\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"HYD\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Hyderabad\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Rajiv Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T21:50:00\",\n            \"arrivalTime\": \"2026-12-18T23:15:00\",\n            \"durationSeconds\": 5100,\n            \"carrier\": \"IX\",\n            \"carrierName\": \"Air India Express\",\n            \"flightNumber\": \"IX1250\",\n            \"cabinClass\": \"Economy\"\n          },\n          {\n            \"from\": \"HYD\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Hyderabad\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Rajiv Gandhi International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-19T05:25:00\",\n            \"arrivalTime\": \"2026-12-19T06:40:00\",\n            \"durationSeconds\": 4500,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E743\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70a1d5145000011f7f129_0|0a1d207c51450000de64c059_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 22196.0,\n      \"priceFormatted\": \"22196 INR\",\n      \"totalDurationSeconds\": 19500,\n      \"bookingUrl\": \"https://kiwi.com/u/3uuu2p8k9x\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T15:00:00\",\n        \"arrivalTime\": \"2026-12-18T20:25:00\",\n        \"durationSeconds\": 19500,\n        \"stops\": 1,\n        \"route\": [\n          \"BLR\",\n          \"MAA\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"MAA\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Chennai\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Chennai International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T15:00:00\",\n            \"arrivalTime\": \"2026-12-18T16:05:00\",\n            \"durationSeconds\": 3900,\n            \"carrier\": \"IX\",\n            \"carrierName\": \"Air India Express\",\n            \"flightNumber\": \"IX2975\",\n            \"cabinClass\": \"Economy\"\n          },\n          {\n            \"from\": \"MAA\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Chennai\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Chennai International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T18:55:00\",\n            \"arrivalTime\": \"2026-12-18T20:25:00\",\n            \"durationSeconds\": 5400,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E588\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70a1d51450000620cb077_0|0a1d207c51450000de64c059_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 22196.0,\n      \"priceFormatted\": \"22196 INR\",\n      \"totalDurationSeconds\": 33600,\n      \"bookingUrl\": \"https://kiwi.com/u/dww2mtqbd2\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T11:05:00\",\n        \"arrivalTime\": \"2026-12-18T20:25:00\",\n        \"durationSeconds\": 33600,\n        \"stops\": 1,\n        \"route\": [\n          \"BLR\",\n          \"MAA\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"MAA\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Chennai\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Chennai International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T11:05:00\",\n            \"arrivalTime\": \"2026-12-18T12:10:00\",\n            \"durationSeconds\": 3900,\n            \"carrier\": \"IX\",\n            \"carrierName\": \"Air India Express\",\n            \"flightNumber\": \"IX1487\",\n            \"cabinClass\": \"Economy\"\n          },\n          {\n            \"from\": \"MAA\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Chennai\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Chennai International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T18:55:00\",\n            \"arrivalTime\": \"2026-12-18T20:25:00\",\n            \"durationSeconds\": 5400,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E588\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70a1d514500006b5874bf_0|0a1d207c51450000de64c059_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 22959.0,\n      \"priceFormatted\": \"22959 INR\",\n      \"totalDurationSeconds\": 19500,\n      \"bookingUrl\": \"https://kiwi.com/u/vc6p8bktgw\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T15:00:00\",\n        \"arrivalTime\": \"2026-12-18T20:25:00\",\n        \"durationSeconds\": 19500,\n        \"stops\": 1,\n        \"route\": [\n          \"BLR\",\n          \"MAA\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"MAA\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Chennai\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Chennai International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T15:00:00\",\n            \"arrivalTime\": \"2026-12-18T16:05:00\",\n            \"durationSeconds\": 3900,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI9761\",\n            \"cabinClass\": \"Economy\"\n          },\n          {\n            \"from\": \"MAA\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Chennai\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Chennai International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T18:55:00\",\n            \"arrivalTime\": \"2026-12-18T20:25:00\",\n            \"durationSeconds\": 5400,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E588\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c70a1d51450000b6a21d26_0|0a1d207c51450000de64c059_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 22959.0,\n      \"priceFormatted\": \"22959 INR\",\n      \"totalDurationSeconds\": 33600,\n      \"bookingUrl\": \"https://kiwi.com/u/jf45rt54cq\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T11:05:00\",\n        \"arrivalTime\": \"2026-12-18T20:25:00\",\n        \"durationSeconds\": 33600,\n        \"stops\": 1,\n        \"route\": [\n          \"BLR\",\n          \"MAA\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"MAA\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Chennai\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Chennai International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T11:05:00\",\n            \"arrivalTime\": \"2026-12-18T12:10:00\",\n            \"durationSeconds\": 3900,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI9643\",\n            \"cabinClass\": \"Economy\"\n          },\n          {\n            \"from\": \"MAA\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Chennai\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Chennai International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T18:55:00\",\n            \"arrivalTime\": \"2026-12-18T20:25:00\",\n            \"durationSeconds\": 5400,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E588\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c706c1514500006f5d139c_0|06c1207c5146000084802f97_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 23051.0,\n      \"priceFormatted\": \"23051 INR\",\n      \"totalDurationSeconds\": 32700,\n      \"bookingUrl\": \"https://kiwi.com/u/c2kccqkryz\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 2\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T21:35:00\",\n        \"arrivalTime\": \"2026-12-19T06:40:00\",\n        \"durationSeconds\": 32700,\n        \"stops\": 1,\n        \"route\": [\n          \"BLR\",\n          \"HYD\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"HYD\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Hyderabad\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Rajiv Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T21:35:00\",\n            \"arrivalTime\": \"2026-12-18T22:45:00\",\n            \"durationSeconds\": 4200,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E6784\",\n            \"cabinClass\": \"Economy\"\n          },\n          {\n            \"from\": \"HYD\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Hyderabad\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Rajiv Gandhi International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-19T05:25:00\",\n            \"arrivalTime\": \"2026-12-19T06:40:00\",\n            \"durationSeconds\": 4500,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E743\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7207c51450000634c4821_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 25072.0,\n      \"priceFormatted\": \"25072 INR\",\n      \"totalDurationSeconds\": 4800,\n      \"bookingUrl\": \"https://kiwi.com/u/zsbq4d83g9\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 2\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T12:25:00\",\n        \"arrivalTime\": \"2026-12-18T13:45:00\",\n        \"durationSeconds\": 4800,\n        \"stops\": 0,\n        \"route\": [\n          \"BLR\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T12:25:00\",\n            \"arrivalTime\": \"2026-12-18T13:45:00\",\n            \"durationSeconds\": 4800,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E6653\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7207c514500005eb4b103_0|18c7207c514500005eb4b103_1\",\n      \"tripType\": \"oneway\",\n      \"price\": 27641.0,\n      \"priceFormatted\": \"27641 INR\",\n      \"totalDurationSeconds\": 20100,\n      \"bookingUrl\": \"https://kiwi.com/u/kpfqrs4d2d\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T16:25:00\",\n        \"arrivalTime\": \"2026-12-18T22:00:00\",\n        \"durationSeconds\": 20100,\n        \"stops\": 1,\n        \"route\": [\n          \"BLR\",\n          \"BOM\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"BOM\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Mumbai\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Chhatrapati Shivaji International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T16:25:00\",\n            \"arrivalTime\": \"2026-12-18T18:30:00\",\n            \"durationSeconds\": 7500,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI2622\",\n            \"cabinClass\": \"Economy\"\n          },\n          {\n            \"from\": \"BOM\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Mumbai\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Chhatrapati Shivaji International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T20:35:00\",\n            \"arrivalTime\": \"2026-12-18T22:00:00\",\n            \"durationSeconds\": 5100,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI9565\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c706c1514500001eee9985_0|06c1207c51450000416d2260_0\",\n      \"tripType\": \"oneway\",\n      \"price\": 28943.0,\n      \"priceFormatted\": \"28943 INR\",\n      \"totalDurationSeconds\": 16800,\n      \"bookingUrl\": \"https://kiwi.com/u/5d8b87uzfg\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T17:30:00\",\n        \"arrivalTime\": \"2026-12-18T22:10:00\",\n        \"durationSeconds\": 16800,\n        \"stops\": 1,\n        \"route\": [\n          \"BLR\",\n          \"HYD\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"HYD\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Hyderabad\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Rajiv Gandhi International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T17:30:00\",\n            \"arrivalTime\": \"2026-12-18T18:55:00\",\n            \"durationSeconds\": 5100,\n            \"carrier\": \"IX\",\n            \"carrierName\": \"Air India Express\",\n            \"flightNumber\": \"IX2841\",\n            \"cabinClass\": \"Economy\"\n          },\n          {\n            \"from\": \"HYD\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Hyderabad\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Rajiv Gandhi International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T20:55:00\",\n            \"arrivalTime\": \"2026-12-18T22:10:00\",\n            \"durationSeconds\": 4500,\n            \"carrier\": \"6E\",\n            \"carrierName\": \"IndiGo Airlines\",\n            \"flightNumber\": \"6E984\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    },\n    {\n      \"id\": \"18c7207c51450000a616c3a6_0|18c7207c51450000a616c3a6_1\",\n      \"tripType\": \"oneway\",\n      \"price\": 30838.0,\n      \"priceFormatted\": \"30838 INR\",\n      \"totalDurationSeconds\": 15900,\n      \"bookingUrl\": \"https://kiwi.com/u/buv9d8v86g\",\n      \"imageId\": \"goa_in\",\n      \"baggage\": {\n        \"personalItem\": 2,\n        \"cabinBag\": 2,\n        \"checkedBag\": 0\n      },\n      \"outbound\": {\n        \"from\": \"BLR\",\n        \"to\": \"GOI\",\n        \"departureTime\": \"2026-12-18T14:45:00\",\n        \"arrivalTime\": \"2026-12-18T19:10:00\",\n        \"durationSeconds\": 15900,\n        \"stops\": 1,\n        \"route\": [\n          \"BLR\",\n          \"BOM\",\n          \"GOI\"\n        ],\n        \"cabinClass\": \"Economy\",\n        \"segments\": [\n          {\n            \"from\": \"BLR\",\n            \"to\": \"BOM\",\n            \"fromCity\": \"Bengaluru\",\n            \"toCity\": \"Mumbai\",\n            \"fromName\": \"Bengaluru International\",\n            \"toName\": \"Chhatrapati Shivaji International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T14:45:00\",\n            \"arrivalTime\": \"2026-12-18T16:50:00\",\n            \"durationSeconds\": 7500,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI2483\",\n            \"cabinClass\": \"Economy\"\n          },\n          {\n            \"from\": \"BOM\",\n            \"to\": \"GOI\",\n            \"fromCity\": \"Mumbai\",\n            \"toCity\": \"Goa\",\n            \"fromName\": \"Chhatrapati Shivaji International\",\n            \"toName\": \"Goa International\",\n            \"fromCountry\": \"India\",\n            \"toCountry\": \"India\",\n            \"departureTime\": \"2026-12-18T17:45:00\",\n            \"arrivalTime\": \"2026-12-18T19:10:00\",\n            \"durationSeconds\": 5100,\n            \"carrier\": \"AI\",\n            \"carrierName\": \"Air India Limited\",\n            \"flightNumber\": \"AI9489\",\n            \"cabinClass\": \"Economy\"\n          }\n        ]\n      },\n      \"inbound\": null\n    }\n  ],\n  \"searchTimeMs\": 997,\n  \"error\": null\n}",
+    "type": "text"
+   }
+  ],
+  "isError": false,
+  "structuredContent": {
+   "query": "BLR → GOI on 18/12/2026, 2 adults",
+   "currency": "INR",
+   "passengers": {
+    "adults": 2,
+    "children": 0,
+    "infants": 0
+   },
+   "resultsCount": 15,
+   "itineraries": [
+    {
+     "id": "18c7207c51450000dfbbf17b_0",
+     "tripType": "oneway",
+     "price": 14042.0,
+     "priceFormatted": "14042 INR",
+     "totalDurationSeconds": 5100,
+     "bookingUrl": "https://kiwi.com/u/vx76wmbty5",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T17:45:00",
+      "arrivalTime": "2026-12-18T19:10:00",
+      "durationSeconds": 5100,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "GOI",
+        "fromCity": "Bengaluru",
+        "toCity": "Goa",
+        "fromName": "Bengaluru International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T17:45:00",
+        "arrivalTime": "2026-12-18T19:10:00",
+        "durationSeconds": 5100,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI9563",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7207c5145000014c6d941_0",
+     "tripType": "oneway",
+     "price": 14071.0,
+     "priceFormatted": "14071 INR",
+     "totalDurationSeconds": 5100,
+     "bookingUrl": "https://kiwi.com/u/545vngms9t",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T17:45:00",
+      "arrivalTime": "2026-12-18T19:10:00",
+      "durationSeconds": 5100,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "GOI",
+        "fromCity": "Bengaluru",
+        "toCity": "Goa",
+        "fromName": "Bengaluru International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T17:45:00",
+        "arrivalTime": "2026-12-18T19:10:00",
+        "durationSeconds": 5100,
+        "carrier": "IX",
+        "carrierName": "Air India Express",
+        "flightNumber": "IX1386",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7207c51450000630061a9_0",
+     "tripType": "oneway",
+     "price": 21189.0,
+     "priceFormatted": "21189 INR",
+     "totalDurationSeconds": 5100,
+     "bookingUrl": "https://kiwi.com/u/7njwprm3mb",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T11:05:00",
+      "arrivalTime": "2026-12-18T12:30:00",
+      "durationSeconds": 5100,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "GOI",
+        "fromCity": "Bengaluru",
+        "toCity": "Goa",
+        "fromName": "Bengaluru International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T11:05:00",
+        "arrivalTime": "2026-12-18T12:30:00",
+        "durationSeconds": 5100,
+        "carrier": "IX",
+        "carrierName": "Air India Express",
+        "flightNumber": "IX1539",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7207c51450000b7efe6af_0",
+     "tripType": "oneway",
+     "price": 21819.0,
+     "priceFormatted": "21819 INR",
+     "totalDurationSeconds": 5400,
+     "bookingUrl": "https://kiwi.com/u/ntjsnbhkm8",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T05:20:00",
+      "arrivalTime": "2026-12-18T06:50:00",
+      "durationSeconds": 5400,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "GOI",
+        "fromCity": "Bengaluru",
+        "toCity": "Goa",
+        "fromName": "Bengaluru International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T05:20:00",
+        "arrivalTime": "2026-12-18T06:50:00",
+        "durationSeconds": 5400,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI9491",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7207c514500006f37a482_0",
+     "tripType": "oneway",
+     "price": 21878.0,
+     "priceFormatted": "21878 INR",
+     "totalDurationSeconds": 5100,
+     "bookingUrl": "https://kiwi.com/u/wy8x35w8rz",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T11:05:00",
+      "arrivalTime": "2026-12-18T12:30:00",
+      "durationSeconds": 5100,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "GOI",
+        "fromCity": "Bengaluru",
+        "toCity": "Goa",
+        "fromName": "Bengaluru International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T11:05:00",
+        "arrivalTime": "2026-12-18T12:30:00",
+        "durationSeconds": 5100,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI9801",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c706c1514500006fd0b26a_0|06c1207c5146000084802f97_0",
+     "tripType": "oneway",
+     "price": 22005.0,
+     "priceFormatted": "22005 INR",
+     "totalDurationSeconds": 31800,
+     "bookingUrl": "https://kiwi.com/u/29vks49946",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T21:50:00",
+      "arrivalTime": "2026-12-19T06:40:00",
+      "durationSeconds": 31800,
+      "stops": 1,
+      "route": [
+       "BLR",
+       "HYD",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "HYD",
+        "fromCity": "Bengaluru",
+        "toCity": "Hyderabad",
+        "fromName": "Bengaluru International",
+        "toName": "Rajiv Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T21:50:00",
+        "arrivalTime": "2026-12-18T23:15:00",
+        "durationSeconds": 5100,
+        "carrier": "IX",
+        "carrierName": "Air India Express",
+        "flightNumber": "IX1250",
+        "cabinClass": "Economy"
+       },
+       {
+        "from": "HYD",
+        "to": "GOI",
+        "fromCity": "Hyderabad",
+        "toCity": "Goa",
+        "fromName": "Rajiv Gandhi International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-19T05:25:00",
+        "arrivalTime": "2026-12-19T06:40:00",
+        "durationSeconds": 4500,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E743",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70a1d5145000011f7f129_0|0a1d207c51450000de64c059_0",
+     "tripType": "oneway",
+     "price": 22196.0,
+     "priceFormatted": "22196 INR",
+     "totalDurationSeconds": 19500,
+     "bookingUrl": "https://kiwi.com/u/3uuu2p8k9x",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T15:00:00",
+      "arrivalTime": "2026-12-18T20:25:00",
+      "durationSeconds": 19500,
+      "stops": 1,
+      "route": [
+       "BLR",
+       "MAA",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "MAA",
+        "fromCity": "Bengaluru",
+        "toCity": "Chennai",
+        "fromName": "Bengaluru International",
+        "toName": "Chennai International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T15:00:00",
+        "arrivalTime": "2026-12-18T16:05:00",
+        "durationSeconds": 3900,
+        "carrier": "IX",
+        "carrierName": "Air India Express",
+        "flightNumber": "IX2975",
+        "cabinClass": "Economy"
+       },
+       {
+        "from": "MAA",
+        "to": "GOI",
+        "fromCity": "Chennai",
+        "toCity": "Goa",
+        "fromName": "Chennai International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T18:55:00",
+        "arrivalTime": "2026-12-18T20:25:00",
+        "durationSeconds": 5400,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E588",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70a1d51450000620cb077_0|0a1d207c51450000de64c059_0",
+     "tripType": "oneway",
+     "price": 22196.0,
+     "priceFormatted": "22196 INR",
+     "totalDurationSeconds": 33600,
+     "bookingUrl": "https://kiwi.com/u/dww2mtqbd2",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T11:05:00",
+      "arrivalTime": "2026-12-18T20:25:00",
+      "durationSeconds": 33600,
+      "stops": 1,
+      "route": [
+       "BLR",
+       "MAA",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "MAA",
+        "fromCity": "Bengaluru",
+        "toCity": "Chennai",
+        "fromName": "Bengaluru International",
+        "toName": "Chennai International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T11:05:00",
+        "arrivalTime": "2026-12-18T12:10:00",
+        "durationSeconds": 3900,
+        "carrier": "IX",
+        "carrierName": "Air India Express",
+        "flightNumber": "IX1487",
+        "cabinClass": "Economy"
+       },
+       {
+        "from": "MAA",
+        "to": "GOI",
+        "fromCity": "Chennai",
+        "toCity": "Goa",
+        "fromName": "Chennai International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T18:55:00",
+        "arrivalTime": "2026-12-18T20:25:00",
+        "durationSeconds": 5400,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E588",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70a1d514500006b5874bf_0|0a1d207c51450000de64c059_0",
+     "tripType": "oneway",
+     "price": 22959.0,
+     "priceFormatted": "22959 INR",
+     "totalDurationSeconds": 19500,
+     "bookingUrl": "https://kiwi.com/u/vc6p8bktgw",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T15:00:00",
+      "arrivalTime": "2026-12-18T20:25:00",
+      "durationSeconds": 19500,
+      "stops": 1,
+      "route": [
+       "BLR",
+       "MAA",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "MAA",
+        "fromCity": "Bengaluru",
+        "toCity": "Chennai",
+        "fromName": "Bengaluru International",
+        "toName": "Chennai International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T15:00:00",
+        "arrivalTime": "2026-12-18T16:05:00",
+        "durationSeconds": 3900,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI9761",
+        "cabinClass": "Economy"
+       },
+       {
+        "from": "MAA",
+        "to": "GOI",
+        "fromCity": "Chennai",
+        "toCity": "Goa",
+        "fromName": "Chennai International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T18:55:00",
+        "arrivalTime": "2026-12-18T20:25:00",
+        "durationSeconds": 5400,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E588",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c70a1d51450000b6a21d26_0|0a1d207c51450000de64c059_0",
+     "tripType": "oneway",
+     "price": 22959.0,
+     "priceFormatted": "22959 INR",
+     "totalDurationSeconds": 33600,
+     "bookingUrl": "https://kiwi.com/u/jf45rt54cq",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T11:05:00",
+      "arrivalTime": "2026-12-18T20:25:00",
+      "durationSeconds": 33600,
+      "stops": 1,
+      "route": [
+       "BLR",
+       "MAA",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "MAA",
+        "fromCity": "Bengaluru",
+        "toCity": "Chennai",
+        "fromName": "Bengaluru International",
+        "toName": "Chennai International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T11:05:00",
+        "arrivalTime": "2026-12-18T12:10:00",
+        "durationSeconds": 3900,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI9643",
+        "cabinClass": "Economy"
+       },
+       {
+        "from": "MAA",
+        "to": "GOI",
+        "fromCity": "Chennai",
+        "toCity": "Goa",
+        "fromName": "Chennai International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T18:55:00",
+        "arrivalTime": "2026-12-18T20:25:00",
+        "durationSeconds": 5400,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E588",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c706c1514500006f5d139c_0|06c1207c5146000084802f97_0",
+     "tripType": "oneway",
+     "price": 23051.0,
+     "priceFormatted": "23051 INR",
+     "totalDurationSeconds": 32700,
+     "bookingUrl": "https://kiwi.com/u/c2kccqkryz",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 2
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T21:35:00",
+      "arrivalTime": "2026-12-19T06:40:00",
+      "durationSeconds": 32700,
+      "stops": 1,
+      "route": [
+       "BLR",
+       "HYD",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "HYD",
+        "fromCity": "Bengaluru",
+        "toCity": "Hyderabad",
+        "fromName": "Bengaluru International",
+        "toName": "Rajiv Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T21:35:00",
+        "arrivalTime": "2026-12-18T22:45:00",
+        "durationSeconds": 4200,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E6784",
+        "cabinClass": "Economy"
+       },
+       {
+        "from": "HYD",
+        "to": "GOI",
+        "fromCity": "Hyderabad",
+        "toCity": "Goa",
+        "fromName": "Rajiv Gandhi International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-19T05:25:00",
+        "arrivalTime": "2026-12-19T06:40:00",
+        "durationSeconds": 4500,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E743",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7207c51450000634c4821_0",
+     "tripType": "oneway",
+     "price": 25072.0,
+     "priceFormatted": "25072 INR",
+     "totalDurationSeconds": 4800,
+     "bookingUrl": "https://kiwi.com/u/zsbq4d83g9",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 2
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T12:25:00",
+      "arrivalTime": "2026-12-18T13:45:00",
+      "durationSeconds": 4800,
+      "stops": 0,
+      "route": [
+       "BLR",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "GOI",
+        "fromCity": "Bengaluru",
+        "toCity": "Goa",
+        "fromName": "Bengaluru International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T12:25:00",
+        "arrivalTime": "2026-12-18T13:45:00",
+        "durationSeconds": 4800,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E6653",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7207c514500005eb4b103_0|18c7207c514500005eb4b103_1",
+     "tripType": "oneway",
+     "price": 27641.0,
+     "priceFormatted": "27641 INR",
+     "totalDurationSeconds": 20100,
+     "bookingUrl": "https://kiwi.com/u/kpfqrs4d2d",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T16:25:00",
+      "arrivalTime": "2026-12-18T22:00:00",
+      "durationSeconds": 20100,
+      "stops": 1,
+      "route": [
+       "BLR",
+       "BOM",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "BOM",
+        "fromCity": "Bengaluru",
+        "toCity": "Mumbai",
+        "fromName": "Bengaluru International",
+        "toName": "Chhatrapati Shivaji International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T16:25:00",
+        "arrivalTime": "2026-12-18T18:30:00",
+        "durationSeconds": 7500,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI2622",
+        "cabinClass": "Economy"
+       },
+       {
+        "from": "BOM",
+        "to": "GOI",
+        "fromCity": "Mumbai",
+        "toCity": "Goa",
+        "fromName": "Chhatrapati Shivaji International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T20:35:00",
+        "arrivalTime": "2026-12-18T22:00:00",
+        "durationSeconds": 5100,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI9565",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c706c1514500001eee9985_0|06c1207c51450000416d2260_0",
+     "tripType": "oneway",
+     "price": 28943.0,
+     "priceFormatted": "28943 INR",
+     "totalDurationSeconds": 16800,
+     "bookingUrl": "https://kiwi.com/u/5d8b87uzfg",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T17:30:00",
+      "arrivalTime": "2026-12-18T22:10:00",
+      "durationSeconds": 16800,
+      "stops": 1,
+      "route": [
+       "BLR",
+       "HYD",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "HYD",
+        "fromCity": "Bengaluru",
+        "toCity": "Hyderabad",
+        "fromName": "Bengaluru International",
+        "toName": "Rajiv Gandhi International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T17:30:00",
+        "arrivalTime": "2026-12-18T18:55:00",
+        "durationSeconds": 5100,
+        "carrier": "IX",
+        "carrierName": "Air India Express",
+        "flightNumber": "IX2841",
+        "cabinClass": "Economy"
+       },
+       {
+        "from": "HYD",
+        "to": "GOI",
+        "fromCity": "Hyderabad",
+        "toCity": "Goa",
+        "fromName": "Rajiv Gandhi International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T20:55:00",
+        "arrivalTime": "2026-12-18T22:10:00",
+        "durationSeconds": 4500,
+        "carrier": "6E",
+        "carrierName": "IndiGo Airlines",
+        "flightNumber": "6E984",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    },
+    {
+     "id": "18c7207c51450000a616c3a6_0|18c7207c51450000a616c3a6_1",
+     "tripType": "oneway",
+     "price": 30838.0,
+     "priceFormatted": "30838 INR",
+     "totalDurationSeconds": 15900,
+     "bookingUrl": "https://kiwi.com/u/buv9d8v86g",
+     "imageId": "goa_in",
+     "baggage": {
+      "personalItem": 2,
+      "cabinBag": 2,
+      "checkedBag": 0
+     },
+     "outbound": {
+      "from": "BLR",
+      "to": "GOI",
+      "departureTime": "2026-12-18T14:45:00",
+      "arrivalTime": "2026-12-18T19:10:00",
+      "durationSeconds": 15900,
+      "stops": 1,
+      "route": [
+       "BLR",
+       "BOM",
+       "GOI"
+      ],
+      "cabinClass": "Economy",
+      "segments": [
+       {
+        "from": "BLR",
+        "to": "BOM",
+        "fromCity": "Bengaluru",
+        "toCity": "Mumbai",
+        "fromName": "Bengaluru International",
+        "toName": "Chhatrapati Shivaji International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T14:45:00",
+        "arrivalTime": "2026-12-18T16:50:00",
+        "durationSeconds": 7500,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI2483",
+        "cabinClass": "Economy"
+       },
+       {
+        "from": "BOM",
+        "to": "GOI",
+        "fromCity": "Mumbai",
+        "toCity": "Goa",
+        "fromName": "Chhatrapati Shivaji International",
+        "toName": "Goa International",
+        "fromCountry": "India",
+        "toCountry": "India",
+        "departureTime": "2026-12-18T17:45:00",
+        "arrivalTime": "2026-12-18T19:10:00",
+        "durationSeconds": 5100,
+        "carrier": "AI",
+        "carrierName": "Air India Limited",
+        "flightNumber": "AI9489",
+        "cabinClass": "Economy"
+       }
+      ]
+     },
+     "inbound": null
+    }
+   ],
+   "searchTimeMs": 997,
+   "error": null
+  }
+ }
+}

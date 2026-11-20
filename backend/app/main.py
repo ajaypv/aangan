@@ -15,9 +15,10 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
-from . import agora, impact, languages, orchestrator, persistence, voices
+from . import agora, impact, languages, orchestrator, persistence, rooms, voices
 from .agents import BY_NAME, REGISTRY
 from .config import set_language_override, settings
+from .rooms_api import router as rooms_router
 from .state import DEMO_ENV, STATE
 from .toolkit import run_tool
 
@@ -77,12 +78,16 @@ async def save_household(request: Request, call_next):
     response = await call_next(request)
     path = request.url.path
     # the voice endpoint saves for itself when its stream ends: the response body is still being produced here
-    if request.method != "GET" and path.startswith("/api/"):
+    # a room heartbeat arrives every few seconds from everyone in the room and changes nothing worth saving
+    if request.method != "GET" and path.startswith("/api/") and not path.endswith("/heartbeat"):
         try:
             await run_in_threadpool(persistence.save, STATE)
         except Exception as exc:
             log.warning("could not save the household: %s", exc)
     return response
+
+
+app.include_router(rooms_router)
 
 
 class Utterance(BaseModel):
@@ -262,12 +267,17 @@ def _chunks(reply: str):
 def chat_completions(
     body: ChatCompletionRequest,
     member: str = "",
+    room: str = "",
+    participant: str = "",
     authorization: str | None = Header(default=None),
 ):
-    """OpenAI-compatible endpoint Agora calls as the agent's LLM; runs the Aangan orchestrator for `member`."""
+    """OpenAI-compatible endpoint Agora calls as the agent's LLM; runs the Aangan orchestrator for `member`.
+    With `room` (and `participant`) it is the voice of a Family Room, answered by the room brain instead."""
     key = settings().llm_api_key
     if key and authorization != f"Bearer {key}":
         raise HTTPException(401, "invalid LLM api key")
+    if room:
+        return _room_completion(body, room, participant)
     member_id = _member_or_404(member or STATE.persona or (STATE.members[0]["id"] if STATE.members else ""))
 
     last_user = next((m for m in reversed(body.messages) if m.get("role") == "user"), None)
@@ -305,6 +315,55 @@ def chat_completions(
                 yield _sse({**base, "choices": [{"index": 0, "delta": {"content": sentence + " "}, "finish_reason": None}]})
         except Exception:
             log.exception("voice turn failed")
+            yield _sse({**base, "choices": [{"index": 0, "delta": {"content": "Sorry, something went wrong."}, "finish_reason": None}]})
+        finally:
+            _save_household()
+        yield _sse({**base, "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]})
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream")
+
+
+def _room_completion(body: ChatCompletionRequest, room_id: str, participant_id: str):
+    """The room's voice: what was said is saved in the room, the planner answers and updates the plan, sentence by sentence."""
+    last_user = next((m for m in reversed(body.messages) if m.get("role") == "user"), None)
+    if last_user is None:
+        raise HTTPException(400, "no user message")
+    content = last_user["content"]
+    if isinstance(content, list):
+        content = " ".join(p.get("text", "") for p in content if p.get("type") == "text")
+    content = content.strip()
+    try:
+        # no participant given: the voice speaks for the host (one agent listens to the whole room)
+        participant_id = participant_id or rooms.host_info(STATE, room_id)["id"]
+        rooms.participant_info(STATE, room_id, participant_id)
+    except rooms.RoomError as exc:
+        raise HTTPException(exc.status, exc.detail) from exc
+    completion_id, created, model = f"chatcmpl-{uuid.uuid4().hex[:12]}", int(time.time()), "aangan-agent"
+    if not body.stream:
+        reply = rooms.converse_room(STATE, room_id, participant_id, content)
+        _save_household()
+        return JSONResponse(
+            {
+                "id": completion_id, "object": "chat.completion", "created": created, "model": model,
+                "choices": [{"index": 0, "message": {"role": "assistant", "content": reply}, "finish_reason": "stop"}],
+            }
+        )
+
+    def stream():
+        base = {"id": completion_id, "object": "chat.completion.chunk", "created": created, "model": model}
+        lang = orchestrator._turn_language(content)
+        if lang:  # same as the single-user call: the Murf voice follows the language being spoken, in Aangan's one room voice
+            speak = languages.tts_params(lang, rooms.voice_gender(STATE, room_id))
+            yield _sse(
+                {"id": completion_id, "object": "chat.completion.custom_metadata", "choices": [], "metadata": {"tts_params": {"params": speak}}}
+            )
+        yield _sse({**base, "choices": [{"index": 0, "delta": {"role": "assistant", "content": ""}, "finish_reason": None}]})
+        try:
+            for sentence in rooms.converse_room_stream(STATE, room_id, participant_id, content):
+                yield _sse({**base, "choices": [{"index": 0, "delta": {"content": sentence + " "}, "finish_reason": None}]})
+        except Exception:
+            log.exception("room voice turn failed")
             yield _sse({**base, "choices": [{"index": 0, "delta": {"content": "Sorry, something went wrong."}, "finish_reason": None}]})
         finally:
             _save_household()

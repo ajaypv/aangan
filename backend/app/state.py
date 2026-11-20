@@ -13,6 +13,7 @@ from .config import language_override, set_language_override, settings
 DEMO_ENV = "AANGAN_DEMO_ON_START"
 MAX_EVENTS_SAVED = 200
 MAX_TRANSCRIPT_SAVED = 100
+MAX_ROOM_MESSAGES_SAVED = 300
 
 
 def _zone():
@@ -64,6 +65,7 @@ class FamilyState:
         self.transcript: list[dict] = []
         self.notifications: list[dict] = []
         self.domains: dict = {}
+        self.rooms: dict = {}  # Family Rooms by id (see rooms.py); they are part of the household file
         for agent in REGISTRY:
             self.domains[agent.name] = agent.seed() if self.demo else agent.blank()
 
@@ -154,6 +156,8 @@ class FamilyState:
     # --- persistence (see persistence.py)
     def to_dict(self) -> dict:
         """The household's own data. Never includes settings or secrets."""
+        from . import rooms
+
         return {
             "version": 1,
             "demo": self.demo,
@@ -167,6 +171,7 @@ class FamilyState:
             "persona": self.persona,
             "now": self.now if self.demo else None,
             "language_mode": language_override(),  # the household's own choice in Settings, if it made one
+            "rooms": rooms.export(self.rooms, MAX_ROOM_MESSAGES_SAVED),
         }
 
     def apply_dict(self, data: dict) -> None:
@@ -191,6 +196,9 @@ class FamilyState:
         self.now = dict(saved_now) if self.demo and _scripted_clock() and isinstance(saved_now, dict) else _real_now()
         self.pending, self.stage, self.chaos = None, "before", False
         set_language_override(data.get("language_mode"))
+        from . import rooms
+
+        self.rooms = rooms.restore(data.get("rooms"))  # an older file has none; a damaged room is skipped, never fatal
 
     def snapshot(self) -> dict:
         from .agents import REGISTRY

@@ -48,3 +48,19 @@ Home (what needs attention, what Aangan has done for you, spending), **Ask** (ta
 ## Switching to other languages later
 
 Set `AANGAN_LANGUAGE_MODE=native` in `backend/.env` and restart the backend: members then hear and speak their own language. Test Hinglish recognition first, since it depends on Deepgram's romanised Hindi mode.
+
+## Family Room (plan a trip together)
+
+Home, **Plan together**: give the room a name (for example "Goa trip") and share the link it shows. Anyone who opens the link joins: a family member on a device that already has a profile joins as themselves, anyone else gives a name and joins as a guest.
+
+On a wide screen the plan board is on the left and the discussion (video tiles, chat, Ask Aangan, Summon voice) on the right. On a phone they are two tabs, Plan and Chat.
+
+What to say (typed or spoken once Aangan is summoned):
+1. "Let's go to Goa for Christmas from Bengaluru, December 26 to 30. We are 4, budget around 80000." The plan fills: flights (live search), a hotel, places each day, lunch and dinner each day, and costs against the budget.
+2. "Dadi is coming too, so we need step-free places and pure vegetarian food. Aarav has a peanut allergy." Aangan reads what the family remembers and adjusts.
+3. "Aangan, what do you suggest for the flights and where should we stay?" Aangan answers in the chat.
+4. "Aangan, please book the nonstop flights for all of us." A booking waits for the host (the person who made the room) to press Approve. Bookings are demo bookings: no real money moves.
+
+Aangan only speaks when addressed ("Aangan ..." or the Ask button); otherwise it quietly updates the plan. Flights marked Live come from a real search (Kiwi); hotels, places and restaurants marked Sample come from built-in data. **Reset plan** (API: `POST /api/rooms/<id>/reset-plan`) empties the plan to rehearse again.
+
+Two-device test for the parts that need real microphones: open the link on two phones, turn the camera and microphone on in both, then press **Summon Aangan (voice)** on one and speak. Expected: Aangan answers aloud and the plan changes on both screens. Untested so far: whether Aangan hears two people speaking at once, and who it attributes each voice to (every spoken line is credited to whoever summoned it).

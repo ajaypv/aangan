@@ -4,6 +4,7 @@ import { describeEvent } from '@/lib/describe'
 import { dosesToday, kidOf, schoolToday, seniorOf } from '@/lib/domain'
 import { addDays, dayLabel, joinNames, memberOf, minutes, suggestionsFor } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { PlanTogetherCard } from '@/room/PlanTogetherCard'
 import { useApp } from '@/state/AppState'
 import type { CalendarEvent, Snapshot } from '@/types'
 import {
@@ -500,6 +501,8 @@ export function Home() {
       </header>
 
       <AskCard />
+
+      <PlanTogetherCard />
 
       <section>
         <SectionHeader title="Needs your attention" hint={all.length > TOP_ITEMS ? `The ${TOP_ITEMS} most important of ${all.length}` : undefined} />
