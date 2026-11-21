@@ -43,6 +43,7 @@ PWA (Vite + React, AI Elements)  --RTC audio-->  Agora Conversational AI Engine
 - **Family Room** (`app/rooms.py`, `app/planner.py`, `app/rooms_api.py`): a shared room where people talk (typing, voice or video over Agora RTC) and Aangan turns the discussion into a plan that builds itself on screen: live flights (`app/live_flights.py`, Kiwi), train, bus and car estimates (`app/ground.py`), a stay, places and meals for each day, and a running cost against the budget. The planner is a tool-calling agent over the plan; it never books: it proposes and the host approves (a clearly marked demo booking).
 - **LLM gateway** (`app/gateway.py`): Cloudflare AI Gateway first when `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are set, then the Vercel AI Gateway as the backup, with fallback across several cheap models when one is rate limited (the free tier allows 5 requests a minute per model). A Cloudflare refusal (out of unified-billing credits, a rate limit, no connection) switches to the backup at once and rests Cloudflare for a few minutes. Hindi, Telugu and Kannada turns go straight to the Vercel gateway's Gemini.
 - **Speed**: clear questions are answered by the rule engine in milliseconds; open ones stream, with a spoken lead-in while tools run.
+- **MCP server** (`app/mcp_server.py`): every agent's tools are also an MCP server at `/mcp`, so other agents can use the family's shared household. See below.
 
 Plan the demo with `docs/DEMO.md`.
 
@@ -60,6 +61,25 @@ Copy `backend/.env.example` to `backend/.env` and fill it in. The app's Settings
 `PUBLIC_BASE_URL` must be a public HTTPS address for this backend, because Agora calls `/v1/chat/completions` as the agent's LLM. Use an ngrok or cloudflared tunnel to port 8000, or deploy it.
 
 Agora's pricing page lists $0.10 per minute for Conversational AI, with the first 300 minutes free.
+
+## Use Aangan from other agents (MCP)
+
+The backend is an [MCP](https://modelcontextprotocol.io) server (Streamable HTTP, plain JSON replies, no sessions) at `POST /mcp`, so Claude, Cursor, an Agora or LangGraph agent, or anything that speaks MCP can use the family's shared household.
+
+- **Tools**: every specialist tool as `<agent>_<tool>` (`tasks_add_task`, `tasks_get_shopping_list`, `travel_search_flights`, `calendar_...`, `smart_home_...`; about 65), read-only ones marked with `readOnlyHint`; plus `ask_aangan` (say it in plain language, as a family member: "plan my day", "remind Rahul to pay the bill tomorrow") and `family_members`. Calls are logged in the app's activity feed under their agent, and changes show up in the app.
+- **Auth**: send `Authorization: Bearer <MCP_API_KEY>`. If `MCP_API_KEY` is empty it falls back to `LLM_API_KEY`; with both empty the endpoint is open, which is only for localhost. On Render `MCP_API_KEY` is generated: copy it from the service's Environment tab. Pages on another origin are refused.
+- **Connect**:
+
+```bash
+# Claude Code
+claude mcp add --transport http aangan https://YOUR-SERVICE.onrender.com/mcp --header "Authorization: Bearer YOUR_MCP_API_KEY"
+# Local, no key set
+claude mcp add --transport http aangan http://localhost:8000/mcp
+# Clients that only speak stdio (Claude Desktop): bridge it
+npx mcp-remote https://YOUR-SERVICE.onrender.com/mcp --header "Authorization: Bearer YOUR_MCP_API_KEY"
+```
+
+Tools act on the one shared household, with no per-caller identity: give the token only to agents you would trust with the family's data. Tests: `uv run pytest tests/test_mcp.py`.
 
 ## Virtual 3D house
 
@@ -110,8 +130,8 @@ and `cd frontend && node --test --experimental-strip-types scripts/house.test.mj
 
 `AANGAN_LANGUAGE_MODE` in `backend/.env` (shown by `GET /api/config` as `language_mode`):
 
-- `english`: everything is English for every family member. Replies and greetings are English, speech recognition is `en-IN`, and each member keeps their assigned Murf voice speaking the `en-IN` locale. This is what `render.yaml` sets.
-- `multi`: English, Hindi, Telugu and Kannada. Aangan answers in the language that was spoken (detected per turn) and switches the Murf locale to match.
+- `english`: everything is English for every family member. Replies and greetings are English, speech recognition is `en-IN`, and each member keeps their assigned Murf voice speaking the `en-IN` locale. Pick it for the most predictable demo.
+- `multi`: English, Hindi, Telugu and Kannada. This is what `render.yaml` sets. Aangan answers in the language that was spoken (detected per turn) and switches the Murf locale to match.
 - `native`: each member gets their own language. Hindi and Hinglish speakers get Hinglish replies, recognition is `hi` or `hi-Latn`, and the Murf locale is `hi-IN` or `hi-LATN`.
 
 The mode can also be changed from the app's Settings; that choice is saved with the household.

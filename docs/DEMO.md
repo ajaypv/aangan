@@ -54,6 +54,6 @@ Then say: *"Actually let's fly instead."* The flights appear with live prices an
 
 ## Numbers you can quote
 
-- 1,261 automated tests pass.
+- 1,387 automated tests pass.
 - First spoken word in about 1 to 3 seconds for planning turns; clear calendar questions under 50 ms.
 - Agora Conversational AI: 300 free minutes, then $0.10 a minute. A 3-minute demo uses a few of them.

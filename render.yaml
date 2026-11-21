@@ -10,7 +10,7 @@ services:
     healthCheckPath: /api/config
     envVars:
       - key: AANGAN_LANGUAGE_MODE
-        value: english
+        value: multi              # English, Hindi, Telugu and Kannada, following what is said. Settings can switch a household to english.
       - key: AI_GATEWAY_MODEL
         value: openai/gpt-4o-mini
       - key: MURF_MODEL
@@ -33,5 +33,7 @@ services:
       - key: CLOUDFLARE_MODEL
         value: openai/gpt-4o-mini
       - key: LLM_API_KEY          # Bearer secret Agora sends to /v1/chat/completions: any long random string
+        generateValue: true
+      - key: MCP_API_KEY          # Bearer token other agents send to /mcp (read it from this dashboard to connect them)
         generateValue: true
       # PUBLIC_BASE_URL is not needed: the backend uses the RENDER_EXTERNAL_URL that Render sets itself

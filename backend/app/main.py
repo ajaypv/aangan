@@ -20,6 +20,7 @@ from .agents import BY_NAME, REGISTRY
 from .config import MODEL_KINDS, default_models, model_overrides, set_language_override, set_model_override, settings
 from .rooms_api import router as rooms_router
 from .house_api import router as house_router
+from .mcp_server import router as mcp_router
 from .state import DEMO_ENV, STATE
 from .toolkit import run_tool
 
@@ -90,6 +91,7 @@ async def save_household(request: Request, call_next):
 
 app.include_router(rooms_router)
 app.include_router(house_router)
+app.include_router(mcp_router)
 
 
 class Utterance(BaseModel):

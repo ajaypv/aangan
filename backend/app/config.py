@@ -72,6 +72,7 @@ class Settings:
     murf_model: str
     public_base_url: str
     llm_api_key: str
+    mcp_api_key: str  # bearer token for the MCP endpoint (/mcp); falls back to llm_api_key when empty
     anthropic_api_key: str
     llm_model: str
     openai_api_key: str
@@ -170,6 +171,7 @@ def settings() -> Settings:
         # Render sets RENDER_EXTERNAL_URL to the service's own https address, so a deployment needs no manual URL
         public_base_url=(_env("PUBLIC_BASE_URL") or _env("RENDER_EXTERNAL_URL")).rstrip("/"),
         llm_api_key=_env("LLM_API_KEY"),
+        mcp_api_key=_env("MCP_API_KEY"),
         anthropic_api_key=_env("ANTHROPIC_API_KEY"),
         llm_model=_env("LLM_MODEL", "claude-sonnet-5-5"),
         openai_api_key=_env("OPENAI_API_KEY"),
