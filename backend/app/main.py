@@ -15,9 +15,9 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
-from . import agora, impact, languages, orchestrator, persistence, rooms, voices
+from . import agora, impact, languages, models_catalog, orchestrator, persistence, rooms, voices
 from .agents import BY_NAME, REGISTRY
-from .config import set_language_override, settings
+from .config import MODEL_KINDS, default_models, model_overrides, set_language_override, set_model_override, settings
 from .rooms_api import router as rooms_router
 from .state import DEMO_ENV, STATE
 from .toolkit import run_tool
@@ -127,7 +127,10 @@ def get_config():
     return {
         "services": cfg.services(),
         "brain": "llm" if cfg.llm_ready else "rules",
-        "llm": {"provider": cfg.llm_provider, "model": cfg.llm_model_name} if cfg.llm_ready else None,
+        "llm": {
+            "provider": cfg.llm_provider, "model": cfg.llm_model_name, "indic_model": cfg.ai_gateway_model_indic,
+            "choosable": cfg.llm_provider == "gateway", "overrides": model_overrides(), "defaults": default_models(),
+        } if cfg.llm_ready else None,
         "language_mode": cfg.language_mode,
         "languages": [{"code": l.code, "name": l.name, "native": l.native} for l in languages.LANGUAGES.values()],
         "voices": {m["id"]: voices.voice_for(m) for m in STATE.members},
@@ -148,6 +151,55 @@ def set_language(choice: LanguageChoice):
         raise HTTPException(400, "mode must be multi or english")
     set_language_override(choice.mode)
     return get_config()
+
+
+@app.get("/api/llm/models")
+def llm_models(q: str = "", tools_only: bool = True, limit: int = 30):
+    """Search the models the AI Gateway offers (id, name, provider, price per million tokens, context, tool use). Chat models only."""
+    if settings().llm_provider != "gateway":
+        raise HTTPException(409, {"error": "not_gateway", "message": "Choosing a model needs the AI Gateway key (AI_GATEWAY_API_KEY)."})
+    catalog = models_catalog.fetch_catalog()
+    if not catalog:
+        raise HTTPException(503, {"error": "catalog_unavailable", "message": "Could not load the model list from the gateway. Check your connection and try again."})
+    found = models_catalog.search(catalog, q, tools_only=tools_only, limit=max(1, min(limit, 100)))
+    return {"models": found, "total": len(catalog), "matches": len(found), "query": q}
+
+
+class ModelChoice(BaseModel):
+    model: str | None = None  # None puts the default back
+    kind: str = "main"  # main: English and everything else; indic: Hindi, Telugu and Kannada
+
+
+@app.post("/api/llm/model")
+def set_llm_model(choice: ModelChoice):
+    """The household's AI model choice. It applies from the next message; a voice call in progress keeps its model for that turn only."""
+    if settings().llm_provider != "gateway":
+        raise HTTPException(409, {"error": "not_gateway", "message": "Choosing a model needs the AI Gateway key (AI_GATEWAY_API_KEY)."})
+    if choice.kind not in MODEL_KINDS:
+        raise HTTPException(400, "kind must be main or indic")
+    if choice.model:
+        if not models_catalog.is_valid_id(choice.model):
+            raise HTTPException(400, "a model looks like provider/name, for example openai/gpt-4o-mini")
+        catalog = models_catalog.fetch_catalog()
+        if catalog and not models_catalog.known(choice.model, catalog):
+            raise HTTPException(404, f"the gateway does not list {choice.model}")
+    set_model_override(choice.kind, choice.model)
+    _save_household()
+    return get_config()
+
+
+class ModelTest(BaseModel):
+    model: str
+
+
+@app.post("/api/llm/test")
+def test_llm_model(body: ModelTest):
+    """One tiny request to a model: does it answer, how fast, and does it call a tool? Changes nothing."""
+    if settings().llm_provider != "gateway":
+        raise HTTPException(409, {"error": "not_gateway", "message": "Testing a model needs the AI Gateway key (AI_GATEWAY_API_KEY)."})
+    if not models_catalog.is_valid_id(body.model):
+        raise HTTPException(400, "a model looks like provider/name, for example openai/gpt-4o-mini")
+    return models_catalog.test_model(body.model)
 
 
 @app.get("/api/state")

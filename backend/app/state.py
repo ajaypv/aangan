@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 import httpx
 
 from . import chat, seed
-from .config import language_override, set_language_override, settings
+from .config import language_override, load_model_overrides, model_overrides, set_language_override, settings
 
 DEMO_ENV = "AANGAN_DEMO_ON_START"
 MAX_EVENTS_SAVED = 200
@@ -171,6 +171,7 @@ class FamilyState:
             "persona": self.persona,
             "now": self.now if self.demo else None,
             "language_mode": language_override(),  # the household's own choice in Settings, if it made one
+            "llm_models": model_overrides(),  # likewise the AI model(s) it picked
             "rooms": rooms.export(self.rooms, MAX_ROOM_MESSAGES_SAVED),
         }
 
@@ -196,6 +197,7 @@ class FamilyState:
         self.now = dict(saved_now) if self.demo and _scripted_clock() and isinstance(saved_now, dict) else _real_now()
         self.pending, self.stage, self.chaos = None, "before", False
         set_language_override(data.get("language_mode"))
+        load_model_overrides(data.get("llm_models"))
         from . import rooms
 
         self.rooms = rooms.restore(data.get("rooms"))  # an older file has none; a damaged room is skipped, never fatal

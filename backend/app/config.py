@@ -25,6 +25,38 @@ def language_override() -> str | None:
     return _language_override
 
 
+MODEL_KINDS = ("main", "indic")  # main: English and everything else; indic: Hindi, Telugu and Kannada turns
+_model_override: dict[str, str] = {}
+
+
+def set_model_override(kind: str, model: str | None) -> None:
+    """The household's model choice (Settings), which beats AI_GATEWAY_MODEL and AI_GATEWAY_MODEL_INDIC. None goes back to the default."""
+    if kind not in MODEL_KINDS:
+        return
+    if model:
+        _model_override[kind] = model
+    else:
+        _model_override.pop(kind, None)
+
+
+def model_overrides() -> dict[str, str]:
+    return dict(_model_override)
+
+
+def default_models() -> dict[str, str]:
+    """What each kind uses when the household has made no choice (the environment, else the built-in default)."""
+    return {"main": _env("AI_GATEWAY_MODEL") or "openai/gpt-5-nano", "indic": _env("AI_GATEWAY_MODEL_INDIC", "google/gemini-2.5-flash")}
+
+
+def load_model_overrides(saved) -> None:
+    """From a saved household file; anything that is not a known kind with a text model is ignored."""
+    _model_override.clear()
+    if isinstance(saved, dict):
+        for kind, model in saved.items():
+            if kind in MODEL_KINDS and isinstance(model, str) and model.strip():
+                _model_override[kind] = model.strip()
+
+
 def _language_mode() -> str:
     """multi (default): English, Hindi, Telugu and Kannada, following what is said. english: English only.
     native: each member's own language, as before."""
@@ -96,7 +128,7 @@ class Settings:
 
     @property
     def ai_gateway_model_name(self) -> str:
-        return self.ai_gateway_model or "openai/gpt-5-nano"
+        return _model_override.get("main") or self.ai_gateway_model or "openai/gpt-5-nano"
 
     @property
     def llm_model_name(self) -> str:
@@ -131,7 +163,7 @@ def settings() -> Settings:
         openai_reasoning=_env("OPENAI_REASONING"),
         ai_gateway_api_key=_env("AI_GATEWAY_API_KEY"),
         ai_gateway_model=_env("AI_GATEWAY_MODEL"),
-        ai_gateway_model_indic=_env("AI_GATEWAY_MODEL_INDIC", "google/gemini-2.5-flash"),
+        ai_gateway_model_indic=_model_override.get("indic") or _env("AI_GATEWAY_MODEL_INDIC", "google/gemini-2.5-flash"),
         ai_gateway_fallbacks=_env("AI_GATEWAY_FALLBACKS", "openai/gpt-4.1-mini,google/gemini-2.5-flash,openai/gpt-4.1-nano,openai/gpt-4o-mini"),
         language_mode=_language_mode(),
         chat_host=_env("AGORA_CHAT_HOST"),

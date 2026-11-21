@@ -171,10 +171,47 @@ export interface ServiceStatus {
   missing: string[]
 }
 
+/** `main`: English and everything else. `indic`: Hindi, Telugu and Kannada turns. */
+export type ModelKind = 'main' | 'indic'
+
+/** One chat model from the AI Gateway, as the Settings picker shows it. Prices are dollars per million tokens. */
+export interface LlmModel {
+  id: string
+  name: string
+  provider: string
+  description: string
+  context_window: number | null
+  tools: boolean
+  reasoning: boolean
+  fast: boolean
+  vision: boolean
+  input_per_million: number | null
+  output_per_million: number | null
+}
+
+export interface LlmTestResult {
+  ok: boolean
+  model: string
+  ms: number
+  tool_calling?: boolean
+  note?: string
+  error?: string
+}
+
 export interface AppConfig {
   services: { agora: ServiceStatus; murf: ServiceStatus; voice: ServiceStatus; chat: ServiceStatus; llm: ServiceStatus }
   brain: 'llm' | 'rules'
-  llm?: { provider: 'gateway' | 'openai' | 'anthropic'; model: string } | null
+  llm?: {
+    provider: 'gateway' | 'openai' | 'anthropic'
+    /** The model for English and everything else, and the one for Hindi, Telugu and Kannada turns. */
+    model: string
+    indic_model?: string
+    /** Only the AI Gateway lets the household pick a model. */
+    choosable?: boolean
+    /** What the household picked in Settings, by kind, and what each kind uses otherwise. */
+    overrides?: Partial<Record<ModelKind, string>>
+    defaults?: Record<ModelKind, string>
+  } | null
   voices: Record<string, { name: string; locale: string; gender: string; language: string }>
   tts: { vendor: string; model: string }
   llm_url: string | null

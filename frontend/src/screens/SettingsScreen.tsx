@@ -8,6 +8,7 @@ import { setMe as rememberMe, useMe } from '@/state/me'
 import type { Member, ServiceStatus } from '@/types'
 import { Avatar, Button, Card, ListCard, ListRow, Pill, Section, Switch, inputClass } from '@/ui/primitives'
 import { Sheet } from '@/ui/Sheet'
+import { ModelCard } from './ModelCard'
 
 declare const __APP_VERSION__: string
 declare const __APP_BUILD__: string
@@ -237,6 +238,7 @@ export function SettingsScreen() {
           ))}
         </ListCard>
         <LanguageCard />
+        <ModelCard />
         {(unconnected.length > 0 || config?.language_mode) && (
           <details className="group mt-3 rounded-md border border-line bg-surface">
             <summary className="flex min-h-11 cursor-pointer list-none items-center px-4 text-sm font-semibold lg:min-h-9">Connection details</summary>

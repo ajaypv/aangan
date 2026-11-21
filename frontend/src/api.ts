@@ -1,4 +1,4 @@
-import type { AppConfig, Participant, Room, RoomAgentSession, RoomRtcSession, RoomUnchanged, Snapshot, ToolSpec, VoiceSession } from './types'
+import type { AppConfig, LlmModel, LlmTestResult, ModelKind, Participant, Room, RoomAgentSession, RoomRtcSession, RoomUnchanged, Snapshot, ToolSpec, VoiceSession } from './types'
 
 export class ApiError extends Error {
   status: number
@@ -61,6 +61,15 @@ export const api = {
   config: () => request<AppConfig>('/config'),
   /** `multi`: English, Hindi, Telugu and Kannada following what is said. `english`: English only. */
   language: (mode: 'multi' | 'english') => request<AppConfig>('/language', { mode }),
+  llm: {
+    /** Search the gateway's chat models. */
+    models: (q: string, toolsOnly: boolean) =>
+      request<{ models: LlmModel[]; total: number; matches: number; query: string }>(`/llm/models?q=${encodeURIComponent(q)}&tools_only=${toolsOnly}&limit=30`),
+    /** Pick a model (or `null` for the default) for English and general use (`main`) or for Hindi, Telugu and Kannada (`indic`). */
+    choose: (model: string | null, kind: ModelKind) => request<AppConfig>('/llm/model', { model, kind }),
+    /** One tiny request: does it answer, how fast, does it call a tool. Changes nothing. */
+    test: (model: string) => request<LlmTestResult>('/llm/test', { model }),
+  },
   tools: () => request<ToolSpec[]>('/tools'),
   converse: (member_id: string, message: string) => request<{ reply: string; state: Snapshot }>('/converse', { member_id, message }),
   trigger: (agent: string, name: string) => request<{ reply: string | null; state: Snapshot }>(`/trigger/${agent}/${name}`, {}),

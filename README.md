@@ -39,6 +39,11 @@ PWA (Vite + React, AI Elements)  --RTC audio-->  Agora Conversational AI Engine
 - **Specialist agents** (`app/agents/`): `travel`, `calendar`, `dining`, `school`, `care`, `household`. Each has JSON-schema tools, a rule-based handler, and demo triggers.
 - **Voice** (`app/agora.py`): starts a per-member Agora agent with the official `agora-agents` SDK: Agora ASR, this backend as the LLM, and Murf Falcon TTS with the voice from `app/voices.py` (Murf's recommended Indian voices: Pooja, Rachna, Nikhil, Abhinav and more).
 - **Notifications** (`app/state.py`): recorded in the app and delivered over Agora Chat when configured.
+- **Family Room** (`app/rooms.py`, `app/planner.py`, `app/rooms_api.py`): a shared room where people talk (typing, voice or video over Agora RTC) and Aangan turns the discussion into a plan that builds itself on screen: live flights (`app/live_flights.py`, Kiwi), train, bus and car estimates (`app/ground.py`), a stay, places and meals for each day, and a running cost against the budget. The planner is a tool-calling agent over the plan; it never books: it proposes and the host approves (a clearly marked demo booking).
+- **LLM gateway** (`app/gateway.py`): Vercel AI Gateway with fallback across several cheap models when one is rate limited (the free tier allows 5 requests a minute per model).
+- **Speed**: clear questions are answered by the rule engine in milliseconds; open ones stream, with a spoken lead-in while tools run.
+
+Plan the demo with `docs/DEMO.md`.
 
 ## Connecting the real services
 
@@ -59,14 +64,19 @@ Agora's pricing page lists $0.10 per minute for Conversational AI, with the firs
 
 `AANGAN_LANGUAGE_MODE` in `backend/.env` (shown by `GET /api/config` as `language_mode`):
 
-- `english` (default): everything is English for every family member. Replies and greetings are English, speech recognition is `en-IN`, and each member keeps their assigned Murf voice speaking the `en-IN` locale.
+- `english`: everything is English for every family member. Replies and greetings are English, speech recognition is `en-IN`, and each member keeps their assigned Murf voice speaking the `en-IN` locale. This is what `render.yaml` sets.
+- `multi`: English, Hindi, Telugu and Kannada. Aangan answers in the language that was spoken (detected per turn) and switches the Murf locale to match.
 - `native`: each member gets their own language. Hindi and Hinglish speakers get Hinglish replies, recognition is `hi` or `hi-Latn`, and the Murf locale is `hi-IN` or `hi-LATN`.
+
+The mode can also be changed from the app's Settings; that choice is saved with the household.
 
 ## What is real and what is not
 
-Real: the Agora voice session, Murf voices, Claude tool-calling brain, Agora Chat delivery, the orchestrator and every agent's logic, the family state and calendar, and the PWA.
+Real: the Agora voice session and RTC room, Murf Falcon voices, the tool-calling LLM brain, the orchestrator and every agent's logic, the family state and calendar, the Family Room planner, live flight search for the room (Kiwi), and the PWA.
 
-Not real, and cannot be without third-party accounts: flights, restaurants, cabs and the pharmacy are catalogues stored in the agents' seed data (`app/agents/*.py`). They are the only simulated data. Each agent talks to its catalogue only through its tools, so a real provider can replace one without touching the rest. The demo family (Priya, Rahul, Aarav and Dadi) is seed data in `app/seed.py`; new members are added through the app or by voice.
+Estimates, labelled as such in the app: train, bus and car fares and journey times (worked out from the distance between cities, no timetables).
+
+Not real, and cannot be without third-party accounts: in the family assistant, flights, restaurants, cabs and the pharmacy are catalogues stored in the agents' seed data (`app/agents/*.py`); in the Family Room, hotels, places and restaurants are sample data (marked *Sample*) and bookings are demo bookings (no money moves). These are the only simulated data. Each agent talks to its catalogue only through its tools, so a real provider can replace one without touching the rest. The demo family (Priya, Rahul, Aarav and Dadi) is seed data in `app/seed.py`; new members are added through the app or by voice.
 
 ## Not yet verified against the live services
 
@@ -75,7 +85,13 @@ Verified live:
 - `POST /api/agent/start` starts real agents with that same configuration (Agora accepted it for Rahul and Dadi) and `POST /api/agent/stop` stops them.
 - Murf synthesises speech for every member's voice in `en-IN` (`en-IN-pooja`, `en-IN-nikhil`, `en-IN-abhinav`, `hi-IN-rachna`) and in their native locales.
 
-Not yet verified: audio through our own PWA client (the browser side is still being built against the start-response contract), Hindi and Hinglish speech recognition in native mode, Agora Chat delivery, and the Claude loop against the real API (it passes with a fake client).
+Also verified live: speaking into the Family Room from our own PWA (the transcript reaches the planner, which updates the plan and answers), and the planner's whole text flow against the real model and live flights (plan, switch between train, car and flights, propose a booking and wait for approval).
+
+Not yet verified: Hindi, Telugu and Kannada speech recognition and per-turn Murf locale switching with a real microphone, two people speaking at once in the room, and Agora Chat delivery (not configured).
+
+## Deploying
+
+`render.yaml` is a Render blueprint (one Docker container serves the API and the PWA over HTTPS, which the microphone needs). Set `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE`, `MURF_API_KEY` and `AI_GATEWAY_API_KEY` in the dashboard; `LLM_API_KEY` is generated and the public address is taken from Render. The free plan sleeps after 15 minutes idle, so keep it awake with a pinger on `/api/config` before a demo.
 
 ## Skills installed for development
 
