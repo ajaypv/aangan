@@ -30,10 +30,26 @@ class GatewayNotConfigured(RuntimeError):
 def gateway_client(api_key: str | None = None) -> OpenAI:
     key = api_key or settings().ai_gateway_api_key
     if not key:
+        if settings().cloudflare_ready:  # only Cloudflare is set up: it is the one gateway there is
+            return cloudflare_client()
         raise GatewayNotConfigured("AI_GATEWAY_API_KEY is not set")
     # No automatic retries: the SDK sleeps for the whole "retry after" of a rate limit (30 to 50 seconds), which is a
     # silent voice call. open_stream() moves to another model instead.
     return OpenAI(api_key=key, base_url=BASE_URL, max_retries=0, timeout=30)
+
+
+def cloudflare_client() -> OpenAI:
+    """Cloudflare AI Gateway's OpenAI-compatible endpoint for this account's gateway. The token goes both as the key and in the
+    gateway's own authentication header, so it works whether or not the gateway has authentication switched on."""
+    cfg = settings()
+    if not cfg.cloudflare_ready:
+        raise GatewayNotConfigured("CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are not both set")
+    return OpenAI(
+        api_key=cfg.cloudflare_api_token,
+        base_url=f"https://gateway.ai.cloudflare.com/v1/{cfg.cloudflare_account_id}/{cfg.cloudflare_gateway_id}/compat",
+        default_headers={"cf-aig-authorization": f"Bearer {cfg.cloudflare_api_token}"},
+        max_retries=0, timeout=30,
+    )
 
 
 _COOLING: dict[str, float] = {}  # model -> time until which it is rate limited or refused
@@ -64,9 +80,49 @@ def _retry_after(exc) -> float:
         return DEFAULT_COOLDOWN_S
 
 
-def open_stream(client, kwargs: dict):
-    """Start a streamed completion on the first model that will take it. A rate limit (the free tier allows only a few
-    requests a minute per model) or a refused or failing model moves on to the next one at once, instead of waiting."""
+def _try_cloudflare(kwargs: dict, indic: bool):
+    """The stream from Cloudflare's gateway, or None when it is not set up, is resting, or just failed (the caller carries on
+    with the Vercel gateway). A refusal for credits (402) or a rate limit rests it for a while so the next request does not
+    wait for it again."""
+    cfg = settings()
+    model = cfg.cloudflare_model_indic if indic else cfg.cloudflare_model
+    key = f"cloudflare/{model}"
+    if not (cfg.cloudflare_ready and model) or _COOLING.get(key, 0) > time.time():
+        return None
+    params = {**kwargs, "model": model}
+    if not model.startswith("openai/"):
+        params.pop("reasoning_effort", None)  # an OpenAI setting: the other models behind the gateway do not take it
+    try:
+        return cloudflare_client().chat.completions.create(**params)
+    except openai.RateLimitError as exc:
+        wait = _retry_after(exc)
+        log.warning("cloudflare: %s rate limited for %.0fs, using the Vercel gateway", model, wait)
+        cool_down(key, wait)
+    except openai.APIStatusError as exc:
+        if exc.status_code == 402:  # unified billing credits used up: OpenAI and other providers' models need them
+            log.warning("cloudflare: %s needs credits (402), using the Vercel gateway for the next 5 minutes", model)
+            cool_down(key, 300)
+        elif exc.status_code in (401, 403, 404, 410):  # a token, gateway or model problem: it will not fix itself soon
+            log.warning("cloudflare: %s refused (%s), using the Vercel gateway for the next 5 minutes", model, exc.status_code)
+            cool_down(key, 300)
+        elif exc.status_code == 400:
+            log.warning("cloudflare: %s rejected the request: %s", model, str(exc)[:120])
+        else:
+            log.warning("cloudflare: %s failed (%s), using the Vercel gateway", model, exc.status_code)
+            cool_down(key, 10)
+    except Exception as exc:  # no connection, a timeout, or anything unexpected: the backup is there for exactly this
+        log.warning("cloudflare: %s failed (%s), using the Vercel gateway", model, type(exc).__name__)
+        cool_down(key, 10)
+    return None
+
+
+def open_stream(client, kwargs: dict, indic: bool = False):
+    """Start a streamed completion on the first model that will take it: Cloudflare's gateway first when it is set up, then
+    the Vercel gateway's models. A rate limit (the free tiers allow only a few requests a minute per model) or a refused or
+    failing model moves on to the next one at once, instead of waiting. `indic`: a Hindi, Telugu or Kannada turn."""
+    first = _try_cloudflare(kwargs, indic)
+    if first is not None:
+        return first
     last: Exception | None = None
     for model in model_chain(kwargs["model"]):
         try:

@@ -189,6 +189,9 @@ class FamilyState:
         self.notifications, self.events, self.transcript = notifications, events, transcript
         for agent in REGISTRY:  # an agent added since the file was written still gets its blank domain
             domains.setdefault(agent.name, agent.seed() if self.demo else agent.blank())
+        from .agents.smart_home import initial_tv
+
+        domains["smart_home"].setdefault("tv", initial_tv())
         self.domains = domains
         ids = {m["id"] for m in members}
         saved_persona = data.get("persona") or ""

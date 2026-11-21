@@ -13,6 +13,7 @@ KINDS = [
     ("family", "Family updates"),
     ("care", "School and care"),
     ("money", "Money"),
+    ("tasks", "Tasks and shopping"),
 ]
 KIND_LABEL = dict(KINDS)
 
@@ -51,6 +52,13 @@ TABLE: dict[str, tuple[int, str, str]] = {
     "care.order_refill": (12, "care", "Ordering a medicine refill"),
     "care.book_appointment": (20, "care", "Booking a doctor appointment"),
     "care.get_care_summary": (5, "care", "Summarising a senior's day"),
+    "tasks.add_task": (2, "tasks", "Adding and assigning a task"),
+    "tasks.assign_task": (2, "tasks", "Handing a task to someone"),
+    "tasks.complete_task": (1, "tasks", "Ticking off a task"),
+    "tasks.add_shopping_items": (3, "tasks", "Adding to the shopping list"),
+    "tasks.mark_bought": (1, "tasks", "Ticking off shopping"),
+    "tasks.assign_shopping": (5, "tasks", "Putting someone on the shopping"),
+    "tasks.get_day_plan": (6, "tasks", "Planning someone's day"),
     "money.log_expense": (2, "money", "Logging an expense"),
     "money.get_spending_summary": (5, "money", "Summarising spending"),
     "money.suggest_savings": (5, "money", "Giving savings advice"),

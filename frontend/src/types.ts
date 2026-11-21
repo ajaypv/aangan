@@ -1,3 +1,5 @@
+import type { HouseState } from './house/types'
+
 export type MemberKind = 'adult' | 'child' | 'senior'
 export type Stage = 'before' | 'during' | 'action' | 'after'
 
@@ -140,8 +142,45 @@ export interface CareSenior {
   emergency_contacts: string[]
 }
 
+/** A task on the family list. `assignee` is a member id, `family` (anyone) or null (nobody yet). */
+export interface FamilyTask {
+  id: string
+  title: string
+  assignee: string | null
+  created_by: string | null
+  created: string
+  due: string | null
+  time: string | null
+  priority: 'high' | 'normal' | 'low'
+  note: string
+  done: boolean
+  done_at: string | null
+  done_by: string | null
+  /** The shopping list this task is the errand for, when it is one. */
+  list: string | null
+  event_id: string | null
+}
+
+export interface ShoppingItem {
+  id: string
+  name: string
+  qty: string
+  added_by: string | null
+  bought: boolean
+  bought_by: string | null
+}
+
+export interface ShoppingList {
+  id: string
+  name: string
+  assignee: string | null
+  items: ShoppingItem[]
+}
+
 export interface Domains {
-  school?: { school?: { name: string; start: string; bus_pickup: string }; kids?: Record<string, SchoolKid> }
+  smart_home?: HouseState
+  tasks?: { tasks?: FamilyTask[]; lists?: Record<string, ShoppingList> }
+  school?:{ school?: { name: string; start: string; bus_pickup: string }; kids?: Record<string, SchoolKid> }
   care?: { seniors?: Record<string, CareSenior> }
   travel?: { trips?: Record<string, unknown>[] }
   dining?: { reservations?: Record<string, unknown>[] }
@@ -211,6 +250,8 @@ export interface AppConfig {
     /** What the household picked in Settings, by kind, and what each kind uses otherwise. */
     overrides?: Partial<Record<ModelKind, string>>
     defaults?: Record<ModelKind, string>
+    /** Cloudflare's AI Gateway, tried first when it is set up; the models above are then the backup. */
+    cloudflare?: { model: string; indic_model: string | null; gateway: string } | null
   } | null
   voices: Record<string, { name: string; locale: string; gender: string; language: string }>
   tts: { vendor: string; model: string }

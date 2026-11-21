@@ -4,9 +4,11 @@ from .dining import DiningAgent
 from .household import HouseholdAgent
 from .money import MoneyAgent
 from .school import SchoolAgent
+from .smart_home import SmartHomeAgent
+from .tasks import TasksAgent
 from .travel import TravelAgent
 
-REGISTRY = [TravelAgent(), CalendarAgent(), DiningAgent(), SchoolAgent(), CareAgent(), HouseholdAgent(), MoneyAgent()]
+REGISTRY = [TravelAgent(), CalendarAgent(), DiningAgent(), SchoolAgent(), CareAgent(), HouseholdAgent(), MoneyAgent(), TasksAgent(), SmartHomeAgent()]
 BY_NAME = {a.name: a for a in REGISTRY}
 
 

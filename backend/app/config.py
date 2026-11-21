@@ -81,6 +81,11 @@ class Settings:
     ai_gateway_model_indic: str  # the model for Hindi, Telugu and Kannada turns: it writes those languages far better
     ai_gateway_fallbacks: str  # comma-separated models tried, in order, when the main one is rate limited (the free tier allows 5 requests a minute per model)
     openai_reasoning: str  # optional reasoning effort for the OpenAI brain ("low", "medium", ...); empty leaves the model default
+    cloudflare_api_token: str  # Cloudflare AI Gateway, tried before the Vercel gateway when it is set up
+    cloudflare_account_id: str
+    cloudflare_gateway_id: str
+    cloudflare_model: str  # English and everything else; a Workers AI model needs no credits, an openai/... one needs unified billing credits
+    cloudflare_model_indic: str  # for Hindi, Telugu and Kannada; empty sends those turns straight to the Vercel gateway's model, which writes them better
     language_mode: str  # "english": everything in English; "native": Hindi/Hinglish for members who speak it
     chat_host: str
     chat_app_id: str
@@ -116,13 +121,22 @@ class Settings:
         return not self.missing_chat()
 
     @property
+    def cloudflare_ready(self) -> bool:
+        return bool(self.cloudflare_api_token and self.cloudflare_account_id)
+
+    @property
+    def gateway_ready(self) -> bool:
+        """Either AI gateway is set up: Cloudflare (tried first) or Vercel (the backup)."""
+        return bool(self.ai_gateway_api_key or self.cloudflare_ready)
+
+    @property
     def llm_ready(self) -> bool:
-        return bool(self.ai_gateway_api_key or self.openai_api_key or self.anthropic_api_key)
+        return bool(self.gateway_ready or self.openai_api_key or self.anthropic_api_key)
 
     @property
     def llm_provider(self) -> str:
-        """Vercel AI Gateway first, then OpenAI, then Anthropic. Empty when no key is set."""
-        if self.ai_gateway_api_key:
+        """The AI gateways first (Cloudflare, then Vercel as its backup), then OpenAI, then Anthropic. Empty when no key is set."""
+        if self.gateway_ready:
             return "gateway"
         return "openai" if self.openai_api_key else "anthropic" if self.anthropic_api_key else ""
 
@@ -161,6 +175,11 @@ def settings() -> Settings:
         openai_api_key=_env("OPENAI_API_KEY"),
         openai_model=_env("OPENAI_MODEL", "gpt-6-luna"),
         openai_reasoning=_env("OPENAI_REASONING"),
+        cloudflare_api_token=_env("CLOUDFLARE_API_TOKEN"),
+        cloudflare_account_id=_env("CLOUDFLARE_ACCOUNT_ID"),
+        cloudflare_gateway_id=_env("CLOUDFLARE_GATEWAY_ID", "default"),
+        cloudflare_model=_env("CLOUDFLARE_MODEL", "workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast"),
+        cloudflare_model_indic=_env("CLOUDFLARE_MODEL_INDIC"),
         ai_gateway_api_key=_env("AI_GATEWAY_API_KEY"),
         ai_gateway_model=_env("AI_GATEWAY_MODEL"),
         ai_gateway_model_indic=_model_override.get("indic") or _env("AI_GATEWAY_MODEL_INDIC", "google/gemini-2.5-flash"),

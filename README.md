@@ -36,11 +36,12 @@ PWA (Vite + React, AI Elements)  --RTC audio-->  Agora Conversational AI Engine
 ```
 
 - **Orchestrator** (`app/orchestrator.py`): loads the speaker's context, routes to a specialist, and uses the LLM tool-calling brain (`app/llm.py`: Vercel AI Gateway, OpenAI or Anthropic) when `AI_GATEWAY_API_KEY`, `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` is set.
-- **Specialist agents** (`app/agents/`): `travel`, `calendar`, `dining`, `school`, `care`, `household`. Each has JSON-schema tools, a rule-based handler, and demo triggers.
+- **Specialist agents** (`app/agents/`): `travel`, `calendar`, `dining`, `school`, `care`, `household`, `money`, `tasks`. Each has JSON-schema tools, a rule-based handler, and demo triggers.
+- **Tasks and shopping** (`app/agents/tasks.py`, Family tab > Tasks): a shared shopping list and a task list where every task can be assigned to a person, who is notified. "Plan my day" reads the schedule, what that person owes (overdue first), the shopping they are on, school homework and what the family remembers about them. Adding to the shopping list warns when an item clashes with a remembered diet or allergy. Plain requests ("add milk to the list", "remind Rahul to pay the bill tomorrow", "what is pending for Rahul") are answered by the rules in milliseconds; requests with several parts go to the model, which calls the same tools.
 - **Voice** (`app/agora.py`): starts a per-member Agora agent with the official `agora-agents` SDK: Agora ASR, this backend as the LLM, and Murf Falcon TTS with the voice from `app/voices.py` (Murf's recommended Indian voices: Pooja, Rachna, Nikhil, Abhinav and more).
 - **Notifications** (`app/state.py`): recorded in the app and delivered over Agora Chat when configured.
 - **Family Room** (`app/rooms.py`, `app/planner.py`, `app/rooms_api.py`): a shared room where people talk (typing, voice or video over Agora RTC) and Aangan turns the discussion into a plan that builds itself on screen: live flights (`app/live_flights.py`, Kiwi), train, bus and car estimates (`app/ground.py`), a stay, places and meals for each day, and a running cost against the budget. The planner is a tool-calling agent over the plan; it never books: it proposes and the host approves (a clearly marked demo booking).
-- **LLM gateway** (`app/gateway.py`): Vercel AI Gateway with fallback across several cheap models when one is rate limited (the free tier allows 5 requests a minute per model).
+- **LLM gateway** (`app/gateway.py`): Cloudflare AI Gateway first when `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are set, then the Vercel AI Gateway as the backup, with fallback across several cheap models when one is rate limited (the free tier allows 5 requests a minute per model). A Cloudflare refusal (out of unified-billing credits, a rate limit, no connection) switches to the backup at once and rests Cloudflare for a few minutes. Hindi, Telugu and Kannada turns go straight to the Vercel gateway's Gemini.
 - **Speed**: clear questions are answered by the rule engine in milliseconds; open ones stream, with a spoken lead-in while tools run.
 
 Plan the demo with `docs/DEMO.md`.
@@ -60,6 +61,51 @@ Copy `backend/.env.example` to `backend/.env` and fill it in. The app's Settings
 
 Agora's pricing page lists $0.10 per minute for Conversational AI, with the first 300 minutes free.
 
+## Virtual 3D house
+
+Open `/?house=cozy-home` for a standalone, furnished two-storey house. In
+**Settings > Virtual house**, use its link and select **Link house**. Keep the
+house open in another window, then use the **Ask** page:
+
+- "Turn off the kitchen lights" or "turn off all lights".
+- "Set bedroom lights to 30 percent".
+- "Open the front door" or "close the bedroom door".
+- "Turn on the TV", "turn off the television", or
+  "play https://youtu.be/M7lc1UVf-VE on the TV".
+
+The living room TV plays YouTube on its 3D screen. **Watch TV** moves the camera
+in front of it. Use the TV power button or ask Aangan; **YouTube video** accepts
+a video link or ID. Turning it off removes the player and stops playback.
+The selected video and power state are saved; older households get an off TV.
+Playback starts muted when the browser permits autoplay. Use YouTube's controls
+to play, unmute or enter fullscreen. Unavailable/restricted videos display
+YouTube's own error; choose another link. Playback needs internet access and
+loads YouTube only when the TV is on. This embeds video, it does not download it.
+Restart an already-running backend after updating to load the TV tool and migrate
+saved house state. If an embedded preview browser lacks video codecs, use a normal
+browser or the **open on YouTube** link.
+
+The house polls shared server state every second; link status, room brightness
+and door positions survive restarts. Unlinking disables agent control without
+resetting the scene. The existing text and voice backends use the same logged
+`smart_home` tools. Voice still requires the normal Agora configuration.
+
+This is a **virtual house**, not a physical smart-home integration. Links must
+belong to this Aangan installation; arbitrary sites, hardware and device locks
+are not connected. Like the existing app, the house belongs to the server's
+shared household, not a separately authenticated user account.
+
+The house, door, TV and cabinet geometry are downloaded CC0 assets from
+[Cozy Home Interiors by 3D Assets](https://3dassets.dev/packs/cozy-home-interiors),
+not generated by Aangan. Original files and source/license/hash records are in
+[`frontend/public/models/cozy-home`](frontend/public/models/cozy-home).
+Three.js is lazy-loaded only on the house page. WebGL is required; model and
+connection failures are shown explicitly. Camera buttons and room focus are
+keyboard accessible, and door/light transitions respect reduced motion.
+
+Checks: `cd backend && .venv/Scripts/python -m pytest tests/test_smart_home.py`
+and `cd frontend && node --test --experimental-strip-types scripts/house.test.mjs`.
+
 ## Language mode
 
 `AANGAN_LANGUAGE_MODE` in `backend/.env` (shown by `GET /api/config` as `language_mode`):
@@ -76,7 +122,7 @@ Real: the Agora voice session and RTC room, Murf Falcon voices, the tool-calling
 
 Estimates, labelled as such in the app: train, bus and car fares and journey times (worked out from the distance between cities, no timetables).
 
-Not real, and cannot be without third-party accounts: in the family assistant, flights, restaurants, cabs and the pharmacy are catalogues stored in the agents' seed data (`app/agents/*.py`); in the Family Room, hotels, places and restaurants are sample data (marked *Sample*) and bookings are demo bookings (no money moves). These are the only simulated data. Each agent talks to its catalogue only through its tools, so a real provider can replace one without touching the rest. The demo family (Priya, Rahul, Aarav and Dadi) is seed data in `app/seed.py`; new members are added through the app or by voice.
+Not real, and cannot be without third-party accounts: in the family assistant, flights, restaurants, cabs and the pharmacy are catalogues stored in the agents' seed data (`app/agents/*.py`); in the Family Room, hotels, places and restaurants are sample data (marked *Sample*) and bookings are demo bookings (no money moves). The 3D house also simulates lights, brightness and doors; it does not control physical devices. Each agent talks to its catalogue only through its tools, so a real provider can replace one without touching the rest. The demo family (Priya, Rahul, Aarav and Dadi) is seed data in `app/seed.py`; new members are added through the app or by voice.
 
 ## Not yet verified against the live services
 

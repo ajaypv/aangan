@@ -117,6 +117,11 @@ export function ModelCard() {
       <div>
         <p className="t-card">AI model</p>
         <p className="t-secondary">The model Aangan thinks with. Search the gateway&rsquo;s models, try one, and switch. It applies from the next message.</p>
+        {llm.cloudflare && (
+          <p className="t-caption mt-1.5 rounded-md bg-info-bg px-2.5 py-1.5">
+            {`Cloudflare AI Gateway (${llm.cloudflare.gateway}) is tried first with ${llm.cloudflare.model}${kind === 'indic' && !llm.cloudflare.indic_model ? ', except for Hindi, Telugu and Kannada, which use the model below directly' : ''}. The model chosen here is the backup: it answers at once whenever Cloudflare cannot.`}
+          </p>
+        )}
       </div>
 
       <SegmentedControl<ModelKind>

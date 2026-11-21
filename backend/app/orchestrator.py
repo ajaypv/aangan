@@ -11,7 +11,7 @@ from .config import settings
 from .normalize import normalize
 from .speech import clean_input, speakable
 
-FALLBACK_EN = "I can help with flights and cabs, calendars, restaurant bookings, school updates, care for the older members, and family memory. What do you need?"
+FALLBACK_EN = "I can help with flights and cabs, calendars, restaurant bookings, school updates, care for the older members, family memory, and the linked virtual house's lights and doors. What do you need?"
 FALLBACK_HI = "Main flight aur cab, calendar, restaurant booking, school updates, bade-bujurgon ki dekhbhal aur family ki baatein sambhal sakta hoon. Bataiye kya karna hai?"
 
 
@@ -64,12 +64,12 @@ def route(state, text: str):
 FAST_SCORE = 3
 _COMPOUND = re.compile(
     r"\b(?:and|then|also|plus|after that)\s+(?:then\s+)?(?:please\s+)?"
-    r"(?:book|move|add|cancel|remind|tell|text|message|send|find|schedule|order|log|set|call|reschedule|check|ask|notify|let)\b",
+    r"(?:book|move|add|cancel|remind|tell|text|message|send|find|schedule|order|log|set|call|reschedule|check|ask|notify|let|put|assign|give|make|buy|pick|collect|pay)\b",
     re.I,
 )
 # "What is metformin?", "why is the stock low", "no, I'm asking what that is": questions about meaning need a model, not a status report
 _EXPLAIN = re.compile(
-    r"\b(what(?:'s| is| are| does)\b(?!.*\b(?:schedule|calendar|plan|planned|today|tomorrow|tonight|doing|happening|free|booked|due|left|spent|spend|budget|balance|cost|on)\b)"
+    r"\b(what(?:'s| is| are| does)\b(?!.*\b(?:schedule|calendar|plan|planned|today|tomorrow|tonight|doing|happening|free|booked|due|left|spent|spend|budget|balance|cost|on|pending|overdue|tasks?|to-?do|list|priorities|chores)\b)"
     r"|who is|why|how (?:does|do|come)|explain|i'?m asking|i am asking|do you mean|what do you mean|meaning of|what does .* mean)",
     re.I,
 )

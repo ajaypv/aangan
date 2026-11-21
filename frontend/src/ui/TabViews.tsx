@@ -1,6 +1,7 @@
-import { CalendarDays, MessageSquareText, Users, Wallet, Wrench } from 'lucide-react'
+import { CalendarDays, ListChecks, MessageSquareText, Users, Wallet, Wrench } from 'lucide-react'
 import { ScheduleView } from '@/components/family/Schedule'
 import { SpendingView } from '@/components/family/Spending'
+import { TasksView } from '@/components/family/Tasks'
 import { cn } from '@/lib/utils'
 import { ActivityScreen } from '@/screens/Activity'
 import { Family } from '@/screens/Family'
@@ -35,10 +36,10 @@ export function AskTab() {
   )
 }
 
-/** Family is one place with three views: the people (and what Aangan remembers about them), the shared schedule, and spending. */
+/** Family is one place with four views: the people (and what Aangan remembers about them), the shared schedule, tasks and shopping, and spending. */
 export function FamilyTab() {
   const { view, setTab } = useApp()
-  const current = view === 'schedule' ? 'schedule' : view === 'spending' ? 'spending' : 'people'
+  const current = view === 'schedule' ? 'schedule' : view === 'tasks' ? 'tasks' : view === 'spending' ? 'spending' : 'people'
   return (
     <div>
       <div className="px-4 pt-3 lg:px-8">
@@ -47,13 +48,15 @@ export function FamilyTab() {
           value={current}
           onChange={(v) => setTab('family', v === 'people' ? null : v)}
           options={[
-            { value: 'people', label: 'People', icon: <Users className="size-4" aria-hidden="true" /> },
-            { value: 'schedule', label: 'Schedule', icon: <CalendarDays className="size-4" aria-hidden="true" /> },
-            { value: 'spending', label: 'Spending', icon: <Wallet className="size-4" aria-hidden="true" /> },
+            { value: 'people', label: 'People', icon: <Users className="size-4 max-[420px]:hidden" aria-hidden="true" /> },
+            // four views do not fit with their icons on a phone: the words matter more
+            { value: 'schedule', label: 'Schedule', icon: <CalendarDays className="size-4 max-[420px]:hidden" aria-hidden="true" /> },
+            { value: 'tasks', label: 'Tasks', icon: <ListChecks className="size-4 max-[420px]:hidden" aria-hidden="true" /> },
+            { value: 'spending', label: 'Spending', icon: <Wallet className="size-4 max-[420px]:hidden" aria-hidden="true" /> },
           ]}
         />
       </div>
-      {current === 'schedule' ? <ScheduleView /> : current === 'spending' ? <SpendingView /> : <Family />}
+      {current === 'schedule' ? <ScheduleView /> : current === 'tasks' ? <TasksView /> : current === 'spending' ? <SpendingView /> : <Family />}
     </div>
   )
 }

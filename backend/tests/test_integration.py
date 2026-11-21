@@ -73,7 +73,10 @@ def test_tool_endpoint_runs_a_tool_and_logs_it():
     assert bad["status"] == "error"
     assert client.post("/api/tool/household/nope", json={"args": {}}).status_code == 404
     assert client.post("/api/tool/household/remember_fact", json={"args": {"bogus": 1}}).status_code == 422
-    assert {t["agent"] for t in client.get("/api/tools").json()} == {"travel", "calendar", "dining", "school", "care", "household", "money"}
+    from app.agents import REGISTRY
+
+    assert {t["agent"] for t in client.get("/api/tools").json()} == {a.name for a in REGISTRY if a.tools}  # whichever agents exist
+    assert {"travel", "calendar", "dining", "school", "care", "household", "money", "tasks"} <= {a.name for a in REGISTRY}
 
 
 def test_tunnel_host_can_only_reach_the_llm_endpoint():
@@ -88,7 +91,9 @@ def test_tunnel_host_can_only_reach_the_llm_endpoint():
 def test_snapshot_shape():
     s = client.get("/api/state").json()
     assert [m["id"] for m in s["members"]] == ["priya", "rahul", "aarav", "dadi"]
-    assert set(s["domains"]) == {"travel", "calendar", "dining", "school", "care", "household", "money"}
+    from app.agents import REGISTRY
+
+    assert set(s["domains"]) == {a.name for a in REGISTRY}  # every agent keeps its own slice of the household
 
 
 def test_converse_records_context_and_transcript():

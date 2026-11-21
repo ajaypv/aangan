@@ -18,6 +18,7 @@ import { useRoomId } from '@/room/roomRoute'
 
 // The Family Room (and Leaflet, Agora) load only when a room is opened.
 const RoomScreen = lazy(() => import('@/room/RoomScreen').then((m) => ({ default: m.RoomScreen })))
+const HousePage = lazy(() => import('@/house/HousePage').then((m) => ({ default: m.HousePage })))
 
 const SCREENS: Record<Tab, () => React.ReactNode> = {
   home: () => <Home />,
@@ -98,6 +99,9 @@ function Routes() {
 }
 
 export default function App() {
+  if (new URLSearchParams(location.search).get('house') === 'cozy-home') {
+    return <Suspense fallback={<div className="h-dvh bg-[#122329]" role="status" aria-label="Loading house" />}><HousePage /></Suspense>
+  }
   return (
     <TooltipProvider>
       <PwaProvider>

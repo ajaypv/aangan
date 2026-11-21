@@ -7,6 +7,7 @@ export const AGENT_META: Record<string, { label: string; color: string }> = {
   school: { label: 'School', color: 'var(--agent-school)' },
   care: { label: 'Care', color: 'var(--agent-care)' },
   household: { label: 'Household', color: 'var(--agent-household)' },
+  smart_home: { label: 'Virtual house', color: 'var(--agent-household)' },
   money: { label: 'Money', color: 'rgb(var(--rw-dvt-3))' },
   orchestrator: { label: 'Aangan', color: 'var(--agent-orchestrator)' },
   aangan: { label: 'Aangan', color: 'var(--agent-orchestrator)' },

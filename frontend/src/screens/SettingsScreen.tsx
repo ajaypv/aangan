@@ -9,6 +9,7 @@ import type { Member, ServiceStatus } from '@/types'
 import { Avatar, Button, Card, ListCard, ListRow, Pill, Section, Switch, inputClass } from '@/ui/primitives'
 import { Sheet } from '@/ui/Sheet'
 import { ModelCard } from './ModelCard'
+import { HouseSettings } from '@/house/HouseSettings'
 
 declare const __APP_VERSION__: string
 declare const __APP_BUILD__: string
@@ -225,6 +226,10 @@ export function SettingsScreen() {
             </div>
           </Card>
         )}
+      </Section>
+
+      <Section title="Virtual house" hint="Connect a house that Aangan can control">
+        <HouseSettings />
       </Section>
 
       <Section title="Install" hint="Use Aangan like an app on this device">

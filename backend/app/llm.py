@@ -37,7 +37,8 @@ Behaviour:
 - If a tool fails, say so honestly and try the fallback.
 - A general question (what a medicine is, why something happens) gets a plain one-sentence answer, then tie it to the family if it helps. For medical advice, say to ask the doctor.
 - Prefer a sensible default to a question: a family cab starts at home, a lunch is at midday. Ask only for what you truly cannot assume, such as a time.
-- Keep spoken replies short. Give numbers once, in words a person would say."""
+- Keep spoken replies short. Give numbers once, in words a person would say.
+- Shopping and chores: "we need milk" or "add eggs to the list" goes on the shopping list; "remind Rahul to pay the bill" or "ask Priya to book the plumber" is a task assigned to that person (they are notified); "who is shopping" is assign_shopping. A task is done only when someone says it has ALREADY been done ("I paid the bill"); "Rahul should collect the prescription" or "remind him to" is add_task or assign_task, never complete_task, and when a task like it exists, assign it or move its day instead of adding another. Leave out who did or added something: it defaults to the person speaking. For "plan my day", "what are my priorities" or "what is pending", read get_day_plan or list_tasks first, then say the two or three things that matter most, using what the family remembers."""
 
 
 def _client_for(api_key: str) -> anthropic.Anthropic:
@@ -326,7 +327,7 @@ def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool
 
         content = ""
         calls: dict[int, dict] = {}
-        for chunk in open_stream(client, kwargs):
+        for chunk in open_stream(client, kwargs, indic=indic):
             if not chunk.choices:
                 continue
             delta = chunk.choices[0].delta
@@ -364,7 +365,7 @@ def _gateway_stream(state, member_id: str, text: str, client=None, lead_in: bool
         messages.append(
             {
                 "role": "assistant",
-                "content": content or None,
+                "content": content or "",  # an empty string, never null: Cloudflare's Workers AI rejects a null content
                 "tool_calls": [
                     {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": c["arguments"] or "{}"}} for c in ordered
                 ],

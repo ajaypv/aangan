@@ -1,4 +1,5 @@
 import type { AppConfig, LlmModel, LlmTestResult, ModelKind, Participant, Room, RoomAgentSession, RoomRtcSession, RoomUnchanged, Snapshot, ToolSpec, VoiceSession } from './types'
+import type { HouseState } from './house/types'
 
 export class ApiError extends Error {
   status: number
@@ -28,7 +29,7 @@ function messageFrom(detail: unknown, status: number): string {
   return `Request failed (${status})`
 }
 
-async function request<T>(path: string, body?: unknown): Promise<T> {
+async function request<T>(path: string, body?: unknown, signal?: AbortSignal): Promise<T> {
   // Development only: `?mock=1` answers the room endpoints from an in-memory room (src/room/mockRoom.ts). Removed from production builds.
   if (import.meta.env.DEV && path.startsWith('/rooms') && new URLSearchParams(location.search).get('mock') === '1') {
     const { mockRoomRequest } = await import('./room/mockRoom')
@@ -40,6 +41,7 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
       method: body === undefined ? 'GET' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body),
+      signal,
     })
   } catch {
     throw new ApiError(0, 'Cannot reach the Aangan server. Check your connection and that the backend is running.')
@@ -57,6 +59,10 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
 }
 
 export const api = {
+  house: {
+    get: (signal?: AbortSignal) => request<HouseState>('/house', undefined, signal),
+    link: (house_id: 'cozy-home', linked: boolean) => request<HouseState>('/house/link', { house_id, linked }),
+  },
   state: () => request<Snapshot>('/state'),
   config: () => request<AppConfig>('/config'),
   /** `multi`: English, Hindi, Telugu and Kannada following what is said. `english`: English only. */

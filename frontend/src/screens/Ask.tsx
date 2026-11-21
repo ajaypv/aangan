@@ -12,6 +12,7 @@ import { agentMeta, memberOf } from '@/lib/format'
 import { useApp } from '@/state/AppState'
 import type { Snapshot, ToolEvent } from '@/types'
 import { Button } from '@/ui/primitives'
+import { HouseStatus } from '@/house/HouseStatus'
 
 /** Each tool call belongs to the first agent reply spoken at or after it. */
 function eventsByReply(snap: Snapshot): Map<number, ToolEvent[]> {
@@ -113,6 +114,7 @@ export function Ask() {
   return (
     <div className="mx-auto flex h-full max-w-3xl flex-col">
       <VoicePanel headingRef={panelRef} />
+      <HouseStatus />
       <Conversation className="min-h-0 flex-1">
         <ConversationContent className="gap-5 px-4 py-4" aria-label="Conversation with Aangan">
           {empty && <EmptyAsk snap={snap} me={me} busy={busy || !online} onSend={(t) => void send(t)} onVoice={onVoice} />}

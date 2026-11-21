@@ -476,10 +476,14 @@ class CalendarAgent(Specialist):
     def score(self, state, text: str) -> int:
         from .money import is_money
 
+        from .tasks import owns
+
         if is_money(text):  # spending talk belongs to the Money agent
             return 0
         if state.pending and state.pending.get("agent") == self.name:
             return 3
+        if owns(state, text):  # shopping lists, chores and "plan my day" belong to the Tasks agent
+            return 0
         return 3 if self._intent(state, text) else 0
 
     # --- shared reply helpers

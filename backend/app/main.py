@@ -19,6 +19,7 @@ from . import agora, impact, languages, models_catalog, orchestrator, persistenc
 from .agents import BY_NAME, REGISTRY
 from .config import MODEL_KINDS, default_models, model_overrides, set_language_override, set_model_override, settings
 from .rooms_api import router as rooms_router
+from .house_api import router as house_router
 from .state import DEMO_ENV, STATE
 from .toolkit import run_tool
 
@@ -30,7 +31,7 @@ def _warm_up() -> None:
     try:
         from . import gateway, llm  # noqa: F401
 
-        if settings().ai_gateway_api_key:
+        if settings().gateway_ready:
             gateway.gateway_client()
     except Exception as exc:
         log.warning("LLM warm-up skipped: %s", exc)
@@ -88,6 +89,7 @@ async def save_household(request: Request, call_next):
 
 
 app.include_router(rooms_router)
+app.include_router(house_router)
 
 
 class Utterance(BaseModel):
@@ -130,6 +132,8 @@ def get_config():
         "llm": {
             "provider": cfg.llm_provider, "model": cfg.llm_model_name, "indic_model": cfg.ai_gateway_model_indic,
             "choosable": cfg.llm_provider == "gateway", "overrides": model_overrides(), "defaults": default_models(),
+            # Cloudflare's gateway is tried first when set up; the models above are then the backup
+            "cloudflare": {"model": cfg.cloudflare_model, "indic_model": cfg.cloudflare_model_indic or None, "gateway": cfg.cloudflare_gateway_id} if cfg.cloudflare_ready else None,
         } if cfg.llm_ready else None,
         "language_mode": cfg.language_mode,
         "languages": [{"code": l.code, "name": l.name, "native": l.native} for l in languages.LANGUAGES.values()],

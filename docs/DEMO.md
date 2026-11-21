@@ -26,6 +26,7 @@ It answers from the real calendars in well under a second (the rule engine takes
 
 **0:45 It acts (45 s).** Say: *"Book a cab for Dadi on Sunday morning."*
 Aangan checks Dadi's satsang and the calendar, books through its travel tool, and the family gets notified. Open Settings and run **Rahul's flight delayed**: the agents notice, rebook, move the cab and tell the family without being asked. Then switch on **Simulate a supplier failure** and run it again to show it recovering. This is the agentic workflow: trigger, decide, act, notify.
+Then the everyday part: say *"We need curd and chicken"* (it goes on the shared list and warns that Dadi is vegetarian), *"Ask Rahul to do the groceries"* (he gets the list as an errand and a notification), *"Remind Rahul to pay the water bill tomorrow"* (an assigned task), and finally *"Plan my day"* as Rahul: overdue first, then today, then the shopping he owes. Family tab, Tasks shows all of it.
 
 **1:30 The Family Room (75 s).** Open the room. Two people are in it (second device joins as a guest). Tap **Talk to Aangan** and say:
 *"Plan a family trip from Bengaluru to Goa, 26 to 28 December, four of us, budget forty thousand. We prefer the train, and public transport once there."*

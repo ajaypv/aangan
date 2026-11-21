@@ -942,10 +942,10 @@ def _reply_rule(addressed: bool, lang: str, spoken: bool) -> str:
     return f"This message is addressed to you: after your tool calls, answer in one or two short plain sentences, no markdown or lists or emojis, in {where}.{voice}"
 
 
-def _stream_round(client, kwargs: dict):
+def _stream_round(client, kwargs: dict, indic: bool = False):
     """One streamed model round: yields ("text", piece) as it arrives, then ("end", content, [calls]) with the tool calls assembled."""
     content, calls = "", {}
-    for chunk in open_stream(client, kwargs):
+    for chunk in open_stream(client, kwargs, indic=indic):
         if not chunk.choices:
             continue
         delta = chunk.choices[0].delta
@@ -995,7 +995,7 @@ def _model_turn(state, room_id: str, participant_id: str, message: dict, address
         if cfg.openai_reasoning and not indic:
             kwargs["reasoning_effort"] = cfg.openai_reasoning
         content, calls = "", []
-        for event in _stream_round(client, kwargs):
+        for event in _stream_round(client, kwargs, indic=indic):
             if event[0] == "text":
                 if addressed:
                     yield turn.say(event[1])
@@ -1010,7 +1010,7 @@ def _model_turn(state, room_id: str, participant_id: str, message: dict, address
         for n, call in enumerate(calls):
             call["id"] = call["id"] or f"call_{round_no}_{n}"
         messages.append({
-            "role": "assistant", "content": content or None,
+            "role": "assistant", "content": content or "",  # an empty string, never null: Workers AI rejects a null content
             "tool_calls": [{"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": c["arguments"] or "{}"}} for c in calls],
         })
         for call in calls:
@@ -1176,7 +1176,7 @@ def _enforce_travel_choice(state, room_id: str, said: str) -> None:
 
 
 def _stream_brain(state, room_id: str, participant_id: str, message: dict, addressed: bool, spoken: bool, turn: Turn, client=None):
-    if not settings().ai_gateway_api_key and client is None:
+    if not settings().gateway_ready and client is None:
         if rooms.once(state, room_id, "no_ai"):
             rooms.add_system_message(state, room_id, NO_AI_NOTICE)
         _rule_turn(state, room_id, message, addressed, turn)
